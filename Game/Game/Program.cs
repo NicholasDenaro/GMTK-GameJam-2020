@@ -45,6 +45,9 @@ namespace Game
 
             Engine = Builder.Engine;
 
+            GameFrame frame = Builder.Frame;
+            AvaloniaWindow window = frame.Window as AvaloniaWindow;
+
             Referee = new Referee();
             Engine.TickEnd += Referee.Tick;
 
@@ -70,6 +73,8 @@ namespace Game
                     Engine.SetLocation(new Location(new Description2D(0, 0, ScreenWidth, ScreenHeight)));
                     Setup();
                 }
+
+                ////window.Position = window.Position.WithX(window.Position.X + 1);
             };
 
             Engine.Start();
@@ -79,13 +84,13 @@ namespace Game
 
         public static void Setup()
         {
-            Engine.AddEntity(Player.Create(16, 16));
+            Engine.AddEntity(Player.Create(Program.ScreenWidth / 2, Program.ScreenHeight / 2));
 
-            Engine.AddEntity(Goal.Create(Program.Random.Next(16, Program.ScreenWidth - 16), Program.Random.Next(16, Program.ScreenWidth - 16)));
+            Engine.AddEntity(Goal.Create(Program.Random.Next(16, Program.ScreenWidth - 16), Program.Random.Next(16, Program.ScreenHeight - 16)));
 
             for (int i = 0; i < 20; i++)
             {
-                Engine.AddEntity(Enemy.Create(Program.Random.Next(16, Program.ScreenWidth - 16), Program.Random.Next(16, Program.ScreenWidth - 16)));
+                Engine.AddEntity(Enemy.Create(Program.Random.Next(16, Program.ScreenWidth - 16), Program.Random.Next(16, Program.ScreenHeight - 16)));
             }
 
             Engine.AddEntity(HeadsUpDisplay.Create());
@@ -93,6 +98,7 @@ namespace Game
 
         public static void Rules()
         {
+            // TODO: Make it so the "Player" is what is being controlled
             new TouchRule<Player, Goal>("Goal victory", Rule.RuleType.VICTORY, (location, obj) =>
             {
                 if (!location.GetEntities<Banner>().Any())
@@ -133,6 +139,7 @@ namespace Game
                 }
             });
 
+            // TODO: Make it so the "Player" is what is being controlled
             new TouchRule<Player, Powerup>("Player pickup Powerup", Rule.RuleType.POWERUP, (location, obj) =>
             {
                 Powerup powerup = obj as Powerup;
@@ -210,6 +217,184 @@ namespace Game
                 location.AddEntity(Goal.Create(Program.Random.Next(16, Program.ScreenWidth - 16), Program.Random.Next(16, Program.ScreenWidth - 16)));
             });
 
+            new Rule("control Player", Rule.RuleType.CONTROL, (location, obj) =>
+            {
+                foreach(Player player in location.GetEntities<Player>())
+                {
+                    Referee.Piles[Rule.RuleType.PERSPECTIVE].Peek().Action(location, player);
+                }
+            });
+
+            new Rule("control Enemy", Rule.RuleType.CONTROL, (location, obj) =>
+            {
+                foreach (Enemy enemy in location.GetEntities<Enemy>())
+                {
+                    Referee.Piles[Rule.RuleType.PERSPECTIVE].Peek().Action(location, enemy);
+                }
+            });
+
+            new Rule("control Goal", Rule.RuleType.CONTROL, (location, obj) =>
+            {
+                foreach (Goal goal in location.GetEntities<Goal>())
+                {
+                    Referee.Piles[Rule.RuleType.PERSPECTIVE].Peek().Action(location, goal);
+                }
+            });
+
+            new Rule("top-down", Rule.RuleType.PERSPECTIVE, (location, obj) =>
+            {
+                if (obj == null)
+                {
+                    return;
+                }
+
+                if (location.GetEntities<Banner>().Any())
+                {
+                    return;
+                }
+
+                Description2D d2d = obj as Description2D;
+
+                MouseControllerInfo mci = Program.Mouse[(int)Actions.MOUSEINFO].Info as MouseControllerInfo;
+
+                double dir = 0;
+                if (mci != null)
+                {
+                    dir = d2d.Direction(new Point(mci.X, mci.Y));
+                }
+
+                // Rule.List.Contains(speed type value=x)
+                double speed = 3 * (Program.Referee.Piles[Rule.RuleType.SPEED].FirstOrDefault()?.Action(location, obj) ?? 1); //.Aggregate(1.0, (a, rule) => rule.Action(location) * a );
+
+                // Rule.List.Contains(playstyle type value=top/down)
+                if (Program.Keyboard[(int)Actions.RIGHT].IsDown())
+                {
+                    d2d.ChangeCoordsDelta(speed * Math.Cos(dir + Math.PI / 2), speed * Math.Sin(dir + Math.PI / 2));
+                }
+                if (Program.Keyboard[(int)Actions.UP].IsDown())
+                {
+                    d2d.ChangeCoordsDelta(speed * Math.Cos(dir), speed * Math.Sin(dir));
+                }
+                if (Program.Keyboard[(int)Actions.LEFT].IsDown())
+                {
+                    d2d.ChangeCoordsDelta(speed * Math.Cos(dir - Math.PI / 2), speed * Math.Sin(dir - Math.PI / 2));
+                }
+                if (Program.Keyboard[(int)Actions.DOWN].IsDown())
+                {
+                    d2d.ChangeCoordsDelta(speed * Math.Cos(dir + Math.PI), speed * Math.Sin(dir + Math.PI));
+                }
+            });
+
+            double velocity = 0;
+
+            new Rule("platformer", Rule.RuleType.PERSPECTIVE, (location, obj) =>
+            {
+                if (obj == null)
+                {
+                    return;
+                }
+
+                Description2D d2d = obj as Description2D;
+
+                double speed = 3 * (Program.Referee.Piles[Rule.RuleType.SPEED].FirstOrDefault()?.Action(location, obj) ?? 1); //.Aggregate(1.0, (a, rule) => rule.Action(location) * a );
+
+                velocity += 1.0 / TPS;
+
+                // Rule.List.Contains(playstyle type value=top/down)
+                if (Program.Keyboard[(int)Actions.RIGHT].IsDown())
+                {
+                    d2d.ChangeCoordsDelta(speed, 0);
+                }
+                if (Program.Keyboard[(int)Actions.UP].IsPress())
+                {
+                    if (d2d.Y + velocity >= ((Description2D)location.Description).Height)
+                    {
+                        velocity = -2;
+                    }
+                    //d2d.ChangeCoordsDelta(speed * Math.Cos(dir), speed * Math.Sin(dir));
+                }
+                if (Program.Keyboard[(int)Actions.LEFT].IsDown())
+                {
+                    d2d.ChangeCoordsDelta(-speed, 0);
+                }
+
+                if (d2d.Y + velocity <= ((Description2D)location.Description).Height)
+                {
+                    d2d.ChangeCoordsDelta(0, velocity);
+                }
+                else
+                {
+                    d2d.SetCoords(d2d.X, ((Description2D)location.Description).Height);
+                }
+            });
+
+            int velocityDirection = 1;
+            new Rule("vvvvvv-platformer", Rule.RuleType.PERSPECTIVE, (location, obj) =>
+            {
+                if (obj == null)
+                {
+                    return;
+                }
+
+                Description2D d2d = obj as Description2D;
+
+                double speed = 3 * (Program.Referee.Piles[Rule.RuleType.SPEED].FirstOrDefault()?.Action(location, obj) ?? 1); //.Aggregate(1.0, (a, rule) => rule.Action(location) * a );
+
+                velocity += velocityDirection * 1.0 / TPS;
+                velocity = Math.Clamp(velocity, -10, 10);
+
+                // Rule.List.Contains(playstyle type value=top/down)
+                if (Program.Keyboard[(int)Actions.RIGHT].IsDown())
+                {
+                    d2d.ChangeCoordsDelta(speed, 0);
+                }
+                if (Program.Keyboard[(int)Actions.UP].IsPress())
+                {
+                    if (d2d.Y + velocity >= ((Description2D)location.Description).Height || d2d.Y + velocity <= 0)
+                    {
+                        velocityDirection = -velocityDirection;
+                        velocity = 0;
+                    }
+                }
+                if (Program.Keyboard[(int)Actions.LEFT].IsDown())
+                {
+                    d2d.ChangeCoordsDelta(-speed, 0);
+                }
+
+                if (velocityDirection > 0)
+                {
+                    if (d2d.Y + velocity <= ((Description2D)location.Description).Height)
+                    {
+                        d2d.ChangeCoordsDelta(0, velocity);
+                    }
+                    else
+                    {
+                        d2d.SetCoords(d2d.X, ((Description2D)location.Description).Height);
+                    }
+                }
+                else
+                {
+                    if (d2d.Y + velocity >= 0)
+                    {
+                        d2d.ChangeCoordsDelta(0, velocity);
+                    }
+                    else
+                    {
+                        d2d.SetCoords(d2d.X, 0);
+                    }
+                }
+            });
+
+            ////new Rule("colorblind", Rule.RuleType.OVERLAY, (location, obj) =>
+            ////{
+
+            ////});
+
+            ////new Rule("vertical-flip", Rule.RuleType.OVERLAY, (location, obj) =>
+            ////{
+
+            ////});
+
             new Rule("pop SPAWN", Rule.RuleType.POP, null);
 
             Referee.AddRule(Rule.Rules["Goal victory"]);
@@ -217,6 +402,8 @@ namespace Game
             Referee.AddRule(Rule.Rules["Player pickup Powerup"]);
             Referee.AddRule(Rule.Rules["clicky attack"]);
             Referee.AddRule(Rule.Rules["spawn Powerup"]);
+            Referee.AddRule(Rule.Rules["control Player"]);
+            Referee.AddRule(Rule.Rules["vvvvvv-platformer"]);
 
             for (int i = 0; i < 10; i++)
             {

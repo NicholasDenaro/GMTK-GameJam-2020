@@ -18,41 +18,41 @@ namespace Game
 
         public void Tick(Location location, Entity entity)
         {
-            if (location.GetEntities<Banner>().Any())
-            {
-                return;
-            }
+            ////if (location.GetEntities<Banner>().Any())
+            ////{
+            ////    return;
+            ////}
 
-            Description2D d2d = entity.Description as Description2D;
+            ////Description2D d2d = entity.Description as Description2D;
 
-            MouseControllerInfo mci = Program.Mouse[(int)Actions.MOUSEINFO].Info as MouseControllerInfo;
+            ////MouseControllerInfo mci = Program.Mouse[(int)Actions.MOUSEINFO].Info as MouseControllerInfo;
 
-            double dir = 0;
-            if (mci != null)
-            {
-                dir = d2d.Direction(new Point(mci.X, mci.Y));
-            }
+            ////double dir = 0;
+            ////if (mci != null)
+            ////{
+            ////    dir = d2d.Direction(new Point(mci.X, mci.Y));
+            ////}
 
-            // Rule.List.Contains(speed type value=x)
-            double speed = 3 * (Program.Referee.Piles[Rule.RuleType.SPEED].FirstOrDefault()?.Action(location, this) ?? 1); //.Aggregate(1.0, (a, rule) => rule.Action(location) * a );
+            ////// Rule.List.Contains(speed type value=x)
+            ////double speed = 3 * (Program.Referee.Piles[Rule.RuleType.SPEED].FirstOrDefault()?.Action(location, this) ?? 1); //.Aggregate(1.0, (a, rule) => rule.Action(location) * a );
 
-            // Rule.List.Contains(playstyle type value=top/down)
-            if (Program.Keyboard[(int)Actions.RIGHT].IsDown())
-            {
-                d2d.ChangeCoordsDelta(speed * Math.Cos(dir + Math.PI / 2), speed * Math.Sin(dir + Math.PI / 2));
-            }
-            if (Program.Keyboard[(int)Actions.UP].IsDown())
-            {
-                d2d.ChangeCoordsDelta(speed * Math.Cos(dir), speed * Math.Sin(dir));
-            }
-            if (Program.Keyboard[(int)Actions.LEFT].IsDown())
-            {
-                d2d.ChangeCoordsDelta(speed * Math.Cos(dir - Math.PI / 2), speed * Math.Sin(dir - Math.PI / 2));
-            }
-            if (Program.Keyboard[(int)Actions.DOWN].IsDown())
-            {
-                d2d.ChangeCoordsDelta(speed * Math.Cos(dir + Math.PI), speed * Math.Sin(dir + Math.PI));
-            }
+            ////// Rule.List.Contains(playstyle type value=top/down)
+            ////if (Program.Keyboard[(int)Actions.RIGHT].IsDown())
+            ////{
+            ////    d2d.ChangeCoordsDelta(speed * Math.Cos(dir + Math.PI / 2), speed * Math.Sin(dir + Math.PI / 2));
+            ////}
+            ////if (Program.Keyboard[(int)Actions.UP].IsDown())
+            ////{
+            ////    d2d.ChangeCoordsDelta(speed * Math.Cos(dir), speed * Math.Sin(dir));
+            ////}
+            ////if (Program.Keyboard[(int)Actions.LEFT].IsDown())
+            ////{
+            ////    d2d.ChangeCoordsDelta(speed * Math.Cos(dir - Math.PI / 2), speed * Math.Sin(dir - Math.PI / 2));
+            ////}
+            ////if (Program.Keyboard[(int)Actions.DOWN].IsDown())
+            ////{
+            ////    d2d.ChangeCoordsDelta(speed * Math.Cos(dir + Math.PI), speed * Math.Sin(dir + Math.PI));
+            ////}
         }
 
         public Bitmap Draw()

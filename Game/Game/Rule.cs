@@ -9,10 +9,21 @@ namespace Game
     {
         public static Dictionary<string, Rule> Rules = new Dictionary<string, Rule>();
 
-        public static string GetNameRandomRule()
+        public static string GetNameRandomRule(RuleType? type = null)
         {
-            int r = Program.Random.Next(0, Rules.Count);
-            return Rules.Keys.Skip(r).First();
+            List<string> filteredRules = Rules.Keys.ToList();
+            if (type != null)
+            {
+                filteredRules = filteredRules.Where(name => Rules[name].Type == type).ToList();
+            }
+
+            if (!filteredRules.Any())
+            {
+                return null;
+            }
+
+            int r = Program.Random.Next(0, filteredRules.Count);
+            return filteredRules.Skip(r).First();
         }
 
         public RuleType Type { get; private set; }
@@ -39,6 +50,18 @@ namespace Game
             Rules.Add(name, this);
         }
 
-        public enum RuleType { ATTACK, VICTORY, DEATH, STYLE, SPEED, POWERUP, SPAWN, POP }
+        public enum RuleType {
+            ATTACK,
+            VICTORY,
+            DEATH,
+            STYLE,
+            SPEED,
+            POWERUP,
+            SPAWN,
+            POP,
+            PERSPECTIVE,
+            OVERLAY,
+            CONTROL
+        }
     }
 }

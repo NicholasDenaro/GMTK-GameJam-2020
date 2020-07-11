@@ -13,31 +13,35 @@ namespace Game
         private List<Rule.RuleType> ruleTypes;
         private int ruleIndex;
 
+        public bool IsStarted { get; private set; }
+
+        public bool OutofControl { get; private set; }
+
         public Dictionary<Rule.RuleType, Stack<Rule>> Piles { get; private set; }
 
         public Referee()
         {
             Piles = new Dictionary<Rule.RuleType, Stack<Rule>>();
 
-            ruleTypes = new List<Rule.RuleType>();
-            foreach (Rule.RuleType type in Enum.GetValues(typeof(Rule.RuleType)))
-            {
-                ruleTypes.Add(type);
-                Piles.Add(type, new Stack<Rule>());
-            }
+            ClearRules();
 
             ResetTimer();
         }
 
-        public void ResetTimer()
+        public void ResetTimer(int time = 60 * Program.TPS)
         {
-            Timer = 60 * Program.TPS;
+            Timer = time;
 
             ruleIndex = 0;
         }
 
         public void Tick(object sender, GameState state)
         {
+            if (!IsStarted)
+            {
+                return;
+            }
+
             if (Timer <= 0)
             {
                 if (!state.Location.GetEntities<Banner>().Any())
@@ -45,6 +49,11 @@ namespace Game
                     state.Location.AddEntity(Banner.Create("time expired"));
                 }
 
+                return;
+            }
+
+            if (state.Location.GetEntities<Banner>().Any())
+            {
                 return;
             }
 
@@ -71,18 +80,21 @@ namespace Game
                 }
             }
 
-            if (Timer % Program.TPS == 0)
+            if (OutofControl)
             {
-                state.Location.AddEntity(Powerup.Create(Rule.GetNameRandomRule(), Program.Random.Next(16, Program.ScreenWidth - 16), Program.Random.Next(16, Program.ScreenWidth - 16)));
-            }
-
-            if (Timer % Program.TPS * 3 == 0)
-            {
-                // scroll through the list of rule types one by one
-                string name = Rule.GetNameRandomRule(ruleTypes[ruleIndex++ % ruleTypes.Count]);
-                if (name != null)
+                if (Timer % Program.TPS == 0)
                 {
-                    AddRule(name);
+                    state.Location.AddEntity(Powerup.Create(Rule.GetNameRandomRule(), Program.Random.Next(16, Program.ScreenWidth - 16), Program.Random.Next(16, Program.ScreenWidth - 16)));
+                }
+
+                if (Timer % Program.TPS * 3 == 0)
+                {
+                    // scroll through the list of rule types one by one
+                    string name = Rule.GetNameRandomRule(ruleTypes[ruleIndex++ % ruleTypes.Count]);
+                    if (name != null)
+                    {
+                        AddRule(name);
+                    }
                 }
             }
         }
@@ -96,6 +108,27 @@ namespace Game
         public void AddRule(Rule rule)
         {
             Piles[rule.Type].Push(rule);
+        }
+
+        internal void Start()
+        {
+            IsStarted = true;
+        }
+
+        internal void ClearRules()
+        {
+            Piles.Clear();
+            ruleTypes = new List<Rule.RuleType>();
+            foreach (Rule.RuleType type in Enum.GetValues(typeof(Rule.RuleType)))
+            {
+                ruleTypes.Add(type);
+                Piles.Add(type, new Stack<Rule>());
+            }
+        }
+
+        internal void Stop()
+        {
+            IsStarted = false;
         }
     }
 }

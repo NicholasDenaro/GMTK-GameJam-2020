@@ -33,30 +33,6 @@ namespace Game
 
         private void Tick(Location location, Entity entity)
         {
-            ////Description2D ld2d = location.Description as Description2D;
-
-            ////if (X < 0)
-            ////{
-            ////    xVel = -xVel;
-            ////    ChangeCoordsDelta(-X, 0);
-            ////}
-            ////if (X > ld2d.Width)
-            ////{
-            ////    xVel = -xVel;
-            ////    ChangeCoordsDelta(ld2d.Width - X, 0);
-            ////}
-            ////if (Y < 0)
-            ////{
-            ////    yVel = -yVel;
-            ////    ChangeCoordsDelta(0, -Y);
-            ////}
-            ////if (Y > ld2d.Height)
-            ////{
-            ////    yVel = -yVel;
-            ////    ChangeCoordsDelta(0, ld2d.Height - Y);
-            ////}
-
-            ////ChangeCoordsDelta(xVel, yVel);
         }
 
         public static Entity Create(int x, int y)

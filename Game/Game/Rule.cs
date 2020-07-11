@@ -52,8 +52,8 @@ namespace Game
 
         public enum RuleType {
             ATTACK,
-            VICTORY,
             DEATH,
+            VICTORY,
             STYLE,
             SPEED,
             POWERUP,

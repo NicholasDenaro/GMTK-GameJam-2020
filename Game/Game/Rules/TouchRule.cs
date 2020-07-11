@@ -20,7 +20,7 @@ namespace Game.Rules
             {
                 foreach (T2 t2 in location.GetEntities<T2>())
                 {
-                    if (t1.Distance(t2) < 8)
+                    if (t1 != t2 && t1.GetType() != t2.GetType() && t1.Distance(t2) < 8)
                     {
                         base.Action(location, t2);
                     }

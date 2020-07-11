@@ -6,6 +6,7 @@ using GameEngine.UI.AvaloniaUI;
 using System;
 using System.Collections.Generic;
 using System.Drawing;
+using System.IO;
 using System.Linq;
 using Engine = GameEngine.GameEngine;
 
@@ -17,6 +18,8 @@ namespace Game
         public const int ScreenHeight = 240;
         public const int ScreenWidth = 320;
         public const int Scale = 2;
+
+        public static int Level = 0;
 
         public static Random Random { get; private set; } = new Random();
 
@@ -36,11 +39,11 @@ namespace Game
 
             Builder = new GameBuilder();
             Builder.GameEngine(new FixedTickEngine(TPS))
-                .GameView(new GameView2D(ScreenWidth, ScreenHeight, Scale, Scale, Color.DimGray))
+                .GameView(new GameView2D(ScreenWidth, ScreenHeight, Scale, Scale, Color.DarkSlateGray))
                 .GameFrame(new GameFrame(new AvaloniaWindowBuilder(), 0, 0, ScreenWidth, ScreenHeight, Scale, Scale))
                 .Controller(Keyboard)
                 .Controller(Mouse)
-                .StartingLocation(new Location(new Description2D(0, 0, ScreenWidth, ScreenHeight)))
+                //.StartingLocation(new Location(new Description2D(0, 0, ScreenWidth, ScreenHeight)))
                 .Build();
 
             Engine = Builder.Engine;
@@ -55,7 +58,8 @@ namespace Game
 
             Rules();
 
-            Setup();
+            SetupTitleScreen();
+            //SetupCrazyMode();
 
             Engine.TickEnd += (s, gs) =>
             {
@@ -63,15 +67,39 @@ namespace Game
                 {
                     if (Engine.Location.GetEntities<Banner>().FirstOrDefault()?.Text == "you win")
                     {
-                        for (int i = 0; i < 10; i++)
+                        if (Level == -1)
                         {
-                            Referee.AddRule(Rule.GetNameRandomRule());
+                            for (int i = 0; i < 10; i++)
+                            {
+                                Referee.AddRule(Rule.GetNameRandomRule());
+                            }
+                        }
+                        else
+                        {
+                            Level++;
                         }
                     }
 
+                    switch (Level)
+                    {
+                        case -1:
+                            SetupCrazyMode();
+                            break;
+                        case 2:
+                            SetupLevel2();
+                            break;
+                        case 3:
+                            SetupLevel3();
+                            break;
+                        case 4:
+                            SetupLevel4();
+                            break;
+                        case 5:
+                            SetupLevel5();
+                            break;
+
+                    }
                     Referee.ResetTimer();
-                    Engine.SetLocation(new Location(new Description2D(0, 0, ScreenWidth, ScreenHeight)));
-                    Setup();
                 }
 
                 ////window.Position = window.Position.WithX(window.Position.X + 1);
@@ -82,8 +110,11 @@ namespace Game
             while (true) { }
         }
 
-        public static void Setup()
+        public static void SetupCrazyMode()
         {
+            Level = -1;
+
+            Engine.SetLocation(new Location(new Description2D(0, 0, ScreenWidth, ScreenHeight)));
             Engine.AddEntity(Player.Create(Program.ScreenWidth / 2, Program.ScreenHeight / 2));
 
             Engine.AddEntity(Goal.Create(Program.Random.Next(16, Program.ScreenWidth - 16), Program.Random.Next(16, Program.ScreenHeight - 16)));
@@ -94,6 +125,375 @@ namespace Game
             }
 
             Engine.AddEntity(HeadsUpDisplay.Create());
+
+            Referee.Start();
+        }
+
+        public static void SetupTitleScreen()
+        {
+            Engine.SetLocation(new Location(new Description2D(0, 0, ScreenWidth, ScreenHeight)));
+            Description2D logoDescription = new Description2D(Sprite.Sprites["gmtklogo"], ScreenWidth / 2, ScreenHeight / 2);
+            Entity logo = new Entity(logoDescription);
+            int timer = TPS * 2;
+            logo.TickAction = (loc, ent) =>
+            {
+                if (logoDescription.ImageIndex < Sprite.Sprites["gmtklogo"].HImages - 1)
+                {
+                    logoDescription.ImageIndex++;
+                }
+                else
+                {
+                    if (timer-- == 0)
+                    {
+                        logoDescription.ImageIndex++;
+                        Engine.AddEntity(Button.Create("Story Mode", SetupLevel1, ScreenWidth / 2 - 128 / 2, ScreenHeight / 2 - 16));
+                        Engine.AddEntity(Button.Create("Crazy Mode", SetupCrazyMode, ScreenWidth / 2 - 128 / 2, ScreenHeight / 2 + 48));
+                    }
+                }
+            };
+
+            Engine.AddEntity(logo);
+        }
+        public static void SetupLevel1()
+        {
+            Level = 1;
+
+            Engine.SetLocation(new Location(new Description2D(0, 0, Program.ScreenWidth, Program.ScreenHeight)));
+
+            Stack<Rule> deck = new Stack<Rule>();
+            deck.Push(Rule.Rules["Goal victory"]);
+            deck.Push(Rule.Rules["control Player"]);
+            deck.Push(Rule.Rules["top-down"]);
+
+            Entity deckFlipper = new Entity(new Description2D(0, 0, 0, 0));
+            int timer = 0;
+            deckFlipper.TickAction = (loc, ent) =>
+            {
+                if (deck.Any() && timer++ % (Program.TPS * 5) == 0)
+                {
+                    Referee.AddRule(deck.Pop());
+                }
+            };
+
+            Engine.AddEntity(deckFlipper);
+
+            Engine.AddEntity(Player.Create(64, Program.ScreenHeight / 2));
+
+            Engine.AddEntity(Goal.Create(Program.ScreenWidth - 64, Program.ScreenHeight / 2));
+
+            Engine.AddEntity(HeadsUpDisplay.Create());
+
+            Referee.ClearRules();
+
+            Referee.Start();
+        }
+
+        public static void SetupLevel2()
+        {
+            Level = 2;
+
+            Engine.SetLocation(new Location(new Description2D(0, 0, Program.ScreenWidth, Program.ScreenHeight)));
+
+            Stack<Rule> deck = new Stack<Rule>();
+            deck.Push(Rule.Rules["pop VICTORY"]);
+            deck.Push(Rule.Rules["Goal victory"]);
+            deck.Push(Rule.Rules["pop VICTORY"]);
+            deck.Push(Rule.Rules["Goal victory"]);
+            deck.Push(Rule.Rules["pop VICTORY"]);
+            deck.Push(Rule.Rules["Goal victory"]);
+            deck.Push(Rule.Rules["pop VICTORY"]);
+            deck.Push(Rule.Rules["Goal victory"]);
+            deck.Push(Rule.Rules["pop VICTORY"]);
+
+            Referee.ClearRules();
+
+            Referee.AddRule(Rule.Rules["Goal victory"]);
+            Referee.AddRule(Rule.Rules["control Player"]);
+            Referee.AddRule(Rule.Rules["top-down"]);
+
+            Entity deckFlipper = new Entity(new Description2D(0, 0, 0, 0));
+            int timer = 0;
+            deckFlipper.TickAction = (loc, ent) =>
+            {
+                if (deck.Any() && timer++ % (Program.TPS * 1) == 0)
+                {
+                    Rule rule = deck.Pop();
+                    Referee.AddRule(rule);
+                }
+            };
+
+            Engine.AddEntity(deckFlipper);
+
+            Engine.AddEntity(Player.Create(64, Program.ScreenHeight / 2));
+
+            Engine.AddEntity(Goal.Create(Program.ScreenWidth - 64, Program.ScreenHeight / 2));
+
+            Engine.AddEntity(HeadsUpDisplay.Create());
+
+            Referee.Start();
+        }
+
+        public static void SetupLevel3()
+        {
+            Level = 3;
+
+            Engine.SetLocation(new Location(new Description2D(0, 0, Program.ScreenWidth, Program.ScreenHeight)));
+
+            Stack<Action> deck = new Stack<Action>();
+            deck.Push(() => Referee.AddRule(Rule.Rules["Player pickup Powerup"]));
+            deck.Push(() => Engine.AddEntity(Powerup.Create("pop DEATH", Program.ScreenWidth - 32, Program.ScreenHeight / 2)));
+            deck.Push(() => Referee.AddRule(Rule.Rules["Goal hurty"]));
+            deck.Push(() => Referee.AddRule(Rule.Rules["Goal victory"]));
+            deck.Push(() => Referee.AddRule(Rule.Rules["pop VICTORY"]));
+
+            Referee.ClearRules();
+
+            Referee.AddRule(Rule.Rules["Goal victory"]);
+            Referee.AddRule(Rule.Rules["control Player"]);
+            Referee.AddRule(Rule.Rules["top-down"]);
+
+            Entity deckFlipper = new Entity(new Description2D(0, 0, 0, 0));
+            int timer = 0;
+            deckFlipper.TickAction = (loc, ent) =>
+            {
+                if (Referee.IsStarted && deck.Any() && timer++ % (Program.TPS * 1) == 0)
+                {
+                    deck.Pop().Invoke();
+                }
+            };
+
+            Engine.AddEntity(deckFlipper);
+
+            Engine.AddEntity(Player.Create(64, Program.ScreenHeight / 2));
+
+            Engine.AddEntity(Goal.Create(Program.ScreenWidth - 64, Program.ScreenHeight / 2));
+
+            Engine.AddEntity(HeadsUpDisplay.Create());
+
+            Referee.Start();
+        }
+
+        public static void SetupLevel4()
+        {
+            Level = 4;
+
+            Engine.SetLocation(new Location(new Description2D(0, 0, Program.ScreenWidth, Program.ScreenHeight)));
+
+            Stack<Action> deck = new Stack<Action>();
+            deck.Push(() => Engine.AddEntity(Powerup.Create("pop DEATH", 32, Program.ScreenHeight / 2)));
+            deck.Push(() => Engine.AddEntity(Powerup.Create("pop CONTROL", Program.ScreenWidth - 32, Program.ScreenHeight / 2)));
+            deck.Push(() => Engine.AddEntity(Powerup.Create("pop VICTORY", Program.ScreenWidth / 2, Program.ScreenHeight / 2)));
+
+            Referee.ClearRules();
+
+            Referee.AddRule(Rule.Rules["Goal victory"]);
+            Referee.AddRule(Rule.Rules["Enemy hurty"]);
+            Referee.AddRule(Rule.Rules["Player pickup Powerup"]);
+            Referee.AddRule(Rule.Rules["control Player"]);
+            Referee.AddRule(Rule.Rules["top-down"]);
+
+            Entity deckFlipper = new Entity(new Description2D(0, 0, 0, 0));
+            int timer = 0;
+            deckFlipper.TickAction = (loc, ent) =>
+            {
+                if (Referee.IsStarted && deck.Any() && timer++ % (Program.TPS * 5) == 0)
+                {
+                    deck.Pop().Invoke();
+                }
+            };
+
+            Engine.AddEntity(deckFlipper);
+
+            Engine.AddEntity(Player.Create(64, Program.ScreenHeight / 2));
+
+            Engine.AddEntity(Goal.Create(Program.ScreenWidth - 64, Program.ScreenHeight / 2));
+
+            Engine.AddEntity(Enemy.Create(Program.ScreenWidth - 64 - 16, Program.ScreenHeight / 2));
+            Engine.AddEntity(Enemy.Create(Program.ScreenWidth - 64, Program.ScreenHeight / 2 - 16));
+            Engine.AddEntity(Enemy.Create(Program.ScreenWidth - 64 + 16, Program.ScreenHeight / 2));
+            Engine.AddEntity(Enemy.Create(Program.ScreenWidth - 64, Program.ScreenHeight / 2 + 16));
+
+            Engine.AddEntity(HeadsUpDisplay.Create());
+
+            Referee.Start();
+        }
+
+        public static void SetupLevel5()
+        {
+            Level = 5;
+
+            Engine.SetLocation(new Location(new Description2D(0, 0, Program.ScreenWidth, Program.ScreenHeight)));
+
+            Stack<Action> deck = new Stack<Action>();
+
+            Action spawnPowerups = () =>
+            {
+                Engine.AddEntity(Powerup.Create("platformer", 224 - 8, Program.ScreenHeight / 2 + 80));
+                Engine.AddEntity(Powerup.Create("top-down", 256 - 8, Program.ScreenHeight / 2 + 80));
+                Engine.AddEntity(Powerup.Create("platformer", 288 - 8, Program.ScreenHeight / 2 + 80));
+                Engine.AddEntity(Powerup.Create("top-down", 314 - 8, Program.ScreenHeight / 2 + 80));
+            };
+
+            deck.Push(spawnPowerups);
+            deck.Push(spawnPowerups);
+            deck.Push(spawnPowerups);
+            deck.Push(spawnPowerups);
+            deck.Push(spawnPowerups);
+            deck.Push(spawnPowerups);
+
+            Referee.ClearRules();
+
+            Referee.AddRule(Rule.Rules["Goal victory"]);
+            Referee.AddRule(Rule.Rules["Enemy hurty"]);
+            Referee.AddRule(Rule.Rules["Any pickup Powerup"]);
+            Referee.AddRule(Rule.Rules["control Player"]);
+            Referee.AddRule(Rule.Rules["top-down"]);
+
+            Entity deckFlipper = new Entity(new Description2D(0, 0, 0, 0));
+            int timer = 0;
+            deckFlipper.TickAction = (loc, ent) =>
+            {
+                if (Referee.IsStarted && deck.Any() && timer++ % (Program.TPS * 3.5) == 0)
+                {
+                    deck.Pop().Invoke();
+                }
+            };
+
+            Engine.AddEntity(deckFlipper);
+
+            Engine.AddEntity(Player.Create(64, Program.ScreenHeight / 2 + 64));
+
+            Engine.AddEntity(Goal.Create(Program.ScreenWidth - 64, Program.ScreenHeight / 2));
+
+            Engine.AddEntity(Enemy.Create(Program.ScreenWidth - 64 - 16, Program.ScreenHeight / 2));
+            Engine.AddEntity(Enemy.Create(Program.ScreenWidth - 64, Program.ScreenHeight / 2 - 16));
+            Engine.AddEntity(Enemy.Create(Program.ScreenWidth - 64 + 16, Program.ScreenHeight / 2));
+            Engine.AddEntity(Enemy.Create(Program.ScreenWidth - 64, Program.ScreenHeight / 2 + 16));
+
+            Engine.AddEntity(Wall.Create(0, Program.ScreenHeight / 2 + 32));
+            Engine.AddEntity(Wall.Create(16, Program.ScreenHeight / 2 + 32));
+            Engine.AddEntity(Wall.Create(32, Program.ScreenHeight / 2 + 32));
+            Engine.AddEntity(Wall.Create(48, Program.ScreenHeight / 2 + 32));
+            Engine.AddEntity(Wall.Create(64, Program.ScreenHeight / 2 + 32));
+            Engine.AddEntity(Wall.Create(80, Program.ScreenHeight / 2 + 80));
+            Engine.AddEntity(Wall.Create(96, Program.ScreenHeight / 2 + 80));
+            Engine.AddEntity(Wall.Create(112, Program.ScreenHeight / 2 + 32));
+            Engine.AddEntity(Wall.Create(128, Program.ScreenHeight / 2 + 32));
+            Engine.AddEntity(Wall.Create(144, Program.ScreenHeight / 2 + 32));
+            Engine.AddEntity(Wall.Create(160, Program.ScreenHeight / 2 + 32));
+            Engine.AddEntity(Wall.Create(176, Program.ScreenHeight / 2 + 32));
+            Engine.AddEntity(Wall.Create(176, Program.ScreenHeight / 2 + 16));
+            Engine.AddEntity(Wall.Create(176, Program.ScreenHeight / 2));
+            Engine.AddEntity(Wall.Create(176, Program.ScreenHeight / 2 - 16));
+            Engine.AddEntity(Wall.Create(176, Program.ScreenHeight / 2 - 32));
+            Engine.AddEntity(Wall.Create(176, Program.ScreenHeight / 2 - 48));
+            Engine.AddEntity(Wall.Create(176, Program.ScreenHeight / 2 - 64));
+            Engine.AddEntity(Wall.Create(176, Program.ScreenHeight / 2 - 80));
+            Engine.AddEntity(Wall.Create(176, Program.ScreenHeight / 2 + 48));
+            Engine.AddEntity(Wall.Create(176, Program.ScreenHeight / 2 + 64));
+            Engine.AddEntity(Wall.Create(176, Program.ScreenHeight / 2 + 80));
+
+            Engine.AddEntity(Powerup.Create("clicky attack", 32, 32));
+
+            for (int i = 0; i < Program.ScreenWidth; i += 16)
+            {
+                Engine.AddEntity(Wall.Create(i, Program.ScreenHeight - 16));
+            }
+
+            Entity enemy = Enemy.Create(224, Program.ScreenHeight / 2 + 80);
+            int deltaX = 1;
+            enemy.TickAction += (loc, ent) =>
+            {
+                Description2D d2d = enemy.Description as Description2D;
+                if (d2d.X == Program.ScreenWidth - 16 || d2d.X == 208)
+                {
+                    deltaX = -deltaX;
+                }
+
+                d2d.ChangeCoordsDelta(deltaX, 0);
+            };
+
+            Engine.AddEntity(enemy);
+
+            Engine.AddEntity(HeadsUpDisplay.Create());
+
+            Referee.Start();
+        }
+
+        public static bool Collision(Description2D d1, List<Description2D> d2s)
+        {
+            foreach(Description2D d2 in d2s)
+            {
+                if (Collision(d1, d2))
+                {
+                    return true;
+                }
+            }
+
+            return false;
+        }
+
+        public static bool Collision(Description2D d1, Description2D d2)
+        { 
+            double d1Size = Math.Sqrt(d1.Width * d1.Width + d1.Height * d1.Height / 4);
+            double d2Size = Math.Sqrt(d2.Width * d2.Width + d2.Height * d2.Height / 4);
+
+            double dist = d1.Distance(d2);
+
+            if (dist <= (d1Size + d2Size) / 1.5)
+            {
+                Bitmap bmp = BitmapExtensions.CreateBitmap((int)(d1Size + d2Size) + 20, (int)(d1Size + d2Size) + 20);
+                Graphics gfx = Graphics.FromImage(bmp);
+                float minX = (float)Math.Min(d1.X - d1.Sprite.X, d2.X - d2.Sprite.X);
+                float minY = (float)Math.Min(d1.Y - d1.Sprite.X, d2.Y - d2.Sprite.X);
+                gfx.TranslateTransform(-minX + 10, -minY + 10);
+
+                Bitmap b1 = (Bitmap)d1.Image();
+                Bitmap b2 = (Bitmap)d2.Image();
+
+                gfx.DrawImage(b1, (float)d1.X - d1.Sprite.X, (float)d1.Y - d1.Sprite.X);
+                gfx.DrawImage(b2, (float)d2.X - d2.Sprite.X, (float)d2.Y - d2.Sprite.Y);
+
+                int total = 0;
+                for (int i = 0; i < b1.Width; i++)
+                {
+                    for (int j = 0; j < b1.Height; j++)
+                    {
+                        if (b1.GetPixel(i, j).A != 0)
+                        {
+                            total++;
+                        }
+                    }
+                }
+
+                for (int i = 0; i < b2.Width; i++)
+                {
+                    for (int j = 0; j < b2.Height; j++)
+                    {
+                        if (b2.GetPixel(i, j).A != 0)
+                        {
+                            total++;
+                        }
+                    }
+                }
+
+                int count = 0;
+                for (int i = 0; i < bmp.Width; i++)
+                {
+                    for (int j = 0; j < bmp.Height; j++)
+                    {
+                        Color c = bmp.GetPixel(i, j);
+                        if (c.A != 0)
+                        {
+                            count++;
+                        }
+                    }
+                }
+
+                return count != total;
+            }
+
+            return false;
         }
 
         public static void Rules()
@@ -101,40 +501,45 @@ namespace Game
             // TODO: Make it so the "Player" is what is being controlled
             new TouchRule<Player, Goal>("Goal victory", Rule.RuleType.VICTORY, (location, obj) =>
             {
-                if (!location.GetEntities<Banner>().Any())
+                if (!location.GetEntities<Banner>().Any() && Referee.IsStarted)
                 {
+                    Referee.Stop();
                     location.AddEntity(Banner.Create("you win"));
                 }
             });
 
             new TouchRule<Player, Enemy>("Enemy victory", Rule.RuleType.VICTORY, (location, obj) =>
             {
-                if (!location.GetEntities<Banner>().Any())
+                if (!location.GetEntities<Banner>().Any() && Referee.IsStarted)
                 {
+                    Referee.Stop();
                     location.AddEntity(Banner.Create("you win"));
                 }
             });
 
             new TouchRule<Player, Powerup>("Powerup victory", Rule.RuleType.VICTORY, (location, obj) =>
             {
-                if (!location.GetEntities<Banner>().Any())
+                if (!location.GetEntities<Banner>().Any() && Referee.IsStarted)
                 {
+                    Referee.Stop();
                     location.AddEntity(Banner.Create("you win"));
                 }
             });
 
             new TouchRule<Player, Enemy>("Enemy hurty", Rule.RuleType.DEATH, (location, obj) =>
             {
-                if (!location.GetEntities<Banner>().Any())
+                if (!location.GetEntities<Banner>().Any() && Referee.IsStarted)
                 {
+                    Referee.Stop();
                     location.AddEntity(Banner.Create("you lose"));
                 }
             });
 
             new TouchRule<Player, Goal>("Goal hurty", Rule.RuleType.DEATH, (location, obj) =>
             {
-                if (!location.GetEntities<Banner>().Any())
+                if (!location.GetEntities<Banner>().Any() && Referee.IsStarted)
                 {
+                    Referee.Stop();
                     location.AddEntity(Banner.Create("you lose"));
                 }
             });
@@ -145,7 +550,7 @@ namespace Game
                 Powerup powerup = obj as Powerup;
                 Program.Referee.AddRule(powerup.Rule);
                 location.RemoveEntity(powerup.Id);
-                Referee.AddRule(Rule.Rules["Enemy pickup Powerup"]);
+                ////Referee.AddRule(Rule.Rules["Enemy pickup Powerup"]);
             });
 
             new TouchRule<Enemy, Powerup>("Enemy pickup Powerup", Rule.RuleType.POWERUP, (location, obj) =>
@@ -153,7 +558,15 @@ namespace Game
                 Powerup powerup = obj as Powerup;
                 Program.Referee.AddRule(powerup.Rule);
                 location.RemoveEntity(powerup.Id);
-                Referee.AddRule(Rule.Rules["Player pickup Powerup"]);
+                ////Referee.AddRule(Rule.Rules["Player pickup Powerup"]);
+            });
+
+            new TouchRule<Description2D, Powerup>("Any pickup Powerup", Rule.RuleType.POWERUP, (location, obj) =>
+            {
+                Powerup powerup = obj as Powerup;
+                Program.Referee.AddRule(powerup.Rule);
+                location.RemoveEntity(powerup.Id);
+                ////Referee.AddRule(Rule.Rules["Player pickup Powerup"]);
             });
 
             new Rule("clicky attack", Rule.RuleType.ATTACK, (location, obj) =>
@@ -241,149 +654,11 @@ namespace Game
                 }
             });
 
-            new Rule("top-down", Rule.RuleType.PERSPECTIVE, (location, obj) =>
-            {
-                if (obj == null)
-                {
-                    return;
-                }
+            new Rule("top-down", Rule.RuleType.PERSPECTIVE, ControlSchemas.TopDown);
 
-                if (location.GetEntities<Banner>().Any())
-                {
-                    return;
-                }
+            new Rule("platformer", Rule.RuleType.PERSPECTIVE, ControlSchemas.Platformer);
 
-                Description2D d2d = obj as Description2D;
-
-                MouseControllerInfo mci = Program.Mouse[(int)Actions.MOUSEINFO].Info as MouseControllerInfo;
-
-                double dir = 0;
-                if (mci != null)
-                {
-                    dir = d2d.Direction(new Point(mci.X, mci.Y));
-                }
-
-                // Rule.List.Contains(speed type value=x)
-                double speed = 3 * (Program.Referee.Piles[Rule.RuleType.SPEED].FirstOrDefault()?.Action(location, obj) ?? 1); //.Aggregate(1.0, (a, rule) => rule.Action(location) * a );
-
-                // Rule.List.Contains(playstyle type value=top/down)
-                if (Program.Keyboard[(int)Actions.RIGHT].IsDown())
-                {
-                    d2d.ChangeCoordsDelta(speed * Math.Cos(dir + Math.PI / 2), speed * Math.Sin(dir + Math.PI / 2));
-                }
-                if (Program.Keyboard[(int)Actions.UP].IsDown())
-                {
-                    d2d.ChangeCoordsDelta(speed * Math.Cos(dir), speed * Math.Sin(dir));
-                }
-                if (Program.Keyboard[(int)Actions.LEFT].IsDown())
-                {
-                    d2d.ChangeCoordsDelta(speed * Math.Cos(dir - Math.PI / 2), speed * Math.Sin(dir - Math.PI / 2));
-                }
-                if (Program.Keyboard[(int)Actions.DOWN].IsDown())
-                {
-                    d2d.ChangeCoordsDelta(speed * Math.Cos(dir + Math.PI), speed * Math.Sin(dir + Math.PI));
-                }
-            });
-
-            double velocity = 0;
-
-            new Rule("platformer", Rule.RuleType.PERSPECTIVE, (location, obj) =>
-            {
-                if (obj == null)
-                {
-                    return;
-                }
-
-                Description2D d2d = obj as Description2D;
-
-                double speed = 3 * (Program.Referee.Piles[Rule.RuleType.SPEED].FirstOrDefault()?.Action(location, obj) ?? 1); //.Aggregate(1.0, (a, rule) => rule.Action(location) * a );
-
-                velocity += 1.0 / TPS;
-
-                // Rule.List.Contains(playstyle type value=top/down)
-                if (Program.Keyboard[(int)Actions.RIGHT].IsDown())
-                {
-                    d2d.ChangeCoordsDelta(speed, 0);
-                }
-                if (Program.Keyboard[(int)Actions.UP].IsPress())
-                {
-                    if (d2d.Y + velocity >= ((Description2D)location.Description).Height)
-                    {
-                        velocity = -2;
-                    }
-                    //d2d.ChangeCoordsDelta(speed * Math.Cos(dir), speed * Math.Sin(dir));
-                }
-                if (Program.Keyboard[(int)Actions.LEFT].IsDown())
-                {
-                    d2d.ChangeCoordsDelta(-speed, 0);
-                }
-
-                if (d2d.Y + velocity <= ((Description2D)location.Description).Height)
-                {
-                    d2d.ChangeCoordsDelta(0, velocity);
-                }
-                else
-                {
-                    d2d.SetCoords(d2d.X, ((Description2D)location.Description).Height);
-                }
-            });
-
-            int velocityDirection = 1;
-            new Rule("vvvvvv-platformer", Rule.RuleType.PERSPECTIVE, (location, obj) =>
-            {
-                if (obj == null)
-                {
-                    return;
-                }
-
-                Description2D d2d = obj as Description2D;
-
-                double speed = 3 * (Program.Referee.Piles[Rule.RuleType.SPEED].FirstOrDefault()?.Action(location, obj) ?? 1); //.Aggregate(1.0, (a, rule) => rule.Action(location) * a );
-
-                velocity += velocityDirection * 1.0 / TPS;
-                velocity = Math.Clamp(velocity, -10, 10);
-
-                // Rule.List.Contains(playstyle type value=top/down)
-                if (Program.Keyboard[(int)Actions.RIGHT].IsDown())
-                {
-                    d2d.ChangeCoordsDelta(speed, 0);
-                }
-                if (Program.Keyboard[(int)Actions.UP].IsPress())
-                {
-                    if (d2d.Y + velocity >= ((Description2D)location.Description).Height || d2d.Y + velocity <= 0)
-                    {
-                        velocityDirection = -velocityDirection;
-                        velocity = 0;
-                    }
-                }
-                if (Program.Keyboard[(int)Actions.LEFT].IsDown())
-                {
-                    d2d.ChangeCoordsDelta(-speed, 0);
-                }
-
-                if (velocityDirection > 0)
-                {
-                    if (d2d.Y + velocity <= ((Description2D)location.Description).Height)
-                    {
-                        d2d.ChangeCoordsDelta(0, velocity);
-                    }
-                    else
-                    {
-                        d2d.SetCoords(d2d.X, ((Description2D)location.Description).Height);
-                    }
-                }
-                else
-                {
-                    if (d2d.Y + velocity >= 0)
-                    {
-                        d2d.ChangeCoordsDelta(0, velocity);
-                    }
-                    else
-                    {
-                        d2d.SetCoords(d2d.X, 0);
-                    }
-                }
-            });
+            new Rule("vvvvvv-platformer", Rule.RuleType.PERSPECTIVE, ControlSchemas.VVVVVVPlatformer);
 
             ////new Rule("colorblind", Rule.RuleType.OVERLAY, (location, obj) =>
             ////{
@@ -395,7 +670,11 @@ namespace Game
 
             ////});
 
-            new Rule("pop SPAWN", Rule.RuleType.POP, null);
+
+            foreach (Rule.RuleType type in Enum.GetValues(typeof(Rule.RuleType)))
+            {
+                new Rule($"pop {type}", Rule.RuleType.POP, null);
+            }
 
             Referee.AddRule(Rule.Rules["Goal victory"]);
             Referee.AddRule(Rule.Rules["Enemy hurty"]);
@@ -425,6 +704,10 @@ namespace Game
 
             // TODO in engine: Make it so you don't need a sprite. thanks
             new Sprite("HUD", 0, 0);
+            new Sprite("button", 0, 0);
+
+            new Sprite("wall", 8, 8);
+            new Sprite("gmtklogo", "Sprites/gmtklogo.png", 12804 / 66, 128, 12804 / 66 / 2, 128 / 2);
         }
 
         public static Dictionary<Avalonia.Input.Key, Actions> keyMap 

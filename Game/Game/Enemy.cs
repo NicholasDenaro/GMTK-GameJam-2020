@@ -7,19 +7,19 @@ namespace Game
 {
     public class Enemy : Description2D
     {
-        private double direction;
-        private double xVel;
-        private double yVel;
+        public double MoveDirection { get; private set; }
+        public double VelX { get; internal set; }
+        public double VelY { get; internal set; }
 
         public static Color Color { get; private set; } = Color.MediumVioletRed;
 
         public Guid Id { get; private set; }
 
-        public Enemy(int x, int y) : base(Sprite.Sprites["enemy"], x, y)
+        public Enemy(int x, int y) : base(Sprite.Sprites["enemy"], x, y, 16, 16)
         {
-            direction = Program.Random.NextDouble();
-            xVel = Math.Cos(direction * Math.PI * 2);
-            yVel = Math.Sin(direction * Math.PI * 2);
+            MoveDirection = Program.Random.NextDouble() * Math.PI * 2;
+            VelX = Math.Cos(MoveDirection);
+            VelY = Math.Sin(MoveDirection);
         }
 
         private Bitmap Draw()

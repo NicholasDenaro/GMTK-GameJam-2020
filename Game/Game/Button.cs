@@ -24,7 +24,7 @@ namespace Game
             Bitmap bmp = BitmapExtensions.CreateBitmap(this.Width, this.Height);
             Graphics gfx = Graphics.FromImage(bmp);
 
-            Font f = new Font("Arial", 12);
+            Font f = new Font("Arial", 12, FontStyle.Bold);
             StringFormat format = new StringFormat();
             format.Alignment = StringAlignment.Center;
             format.LineAlignment = StringAlignment.Center;

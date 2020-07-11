@@ -68,7 +68,7 @@ namespace Game
                 undo = true;
                 for (int i = 0; i < Math.Abs(deltaX); i++)
                 {
-                    d2d.ChangeCoordsDelta(-Math.Clamp(deltaX, -2, 2), 0);
+                    d2d.ChangeCoordsDelta(-Math.Clamp(deltaX, -1, 1), 0);
                     if (!Program.Collision(d2d, walls))
                     {
                         break;
@@ -82,7 +82,7 @@ namespace Game
                 undo = true;
                 for (int i = 0; i < Math.Abs(deltaY); i++)
                 {
-                    d2d.ChangeCoordsDelta(0, - Math.Clamp(deltaY, -2, 2));
+                    d2d.ChangeCoordsDelta(0, - Math.Clamp(deltaY, -1, 1));
                     if (!Program.Collision(d2d, walls))
                     {
                         break;
@@ -156,19 +156,29 @@ namespace Game
 
             Description2D d2d = obj as Description2D;
 
+            List<Description2D> walls = location.GetEntities<Wall>().Select(w => w as Description2D).ToList();
+
+            d2d.ChangeCoordsDelta(0, Math.Clamp(velocityDirection, -1, 1));
+            bool onGround = Program.Collision(d2d, walls);
+            d2d.ChangeCoordsDelta(0, Math.Clamp(-velocityDirection, -1, 1));
+
             double speed = 3 * (Program.Referee.Piles[Rule.RuleType.SPEED].FirstOrDefault()?.Action(location, obj) ?? 1); //.Aggregate(1.0, (a, rule) => rule.Action(location) * a );
 
-            velocity += velocityDirection * 1.0 / TPS;
+            if (!onGround)
+            {
+                velocity += velocityDirection;
+            }
+
             velocity = Math.Clamp(velocity, -10, 10);
 
             // Rule.List.Contains(playstyle type value=top/down)
             if (Program.Keyboard[(int)Actions.RIGHT].IsDown())
             {
-                d2d.ChangeCoordsDelta(speed, 0);
+                Move(d2d, speed, 0, walls);
             }
             if (Program.Keyboard[(int)Actions.UP].IsPress())
             {
-                if (d2d.Y + velocity >= ((Description2D)location.Description).Height || d2d.Y + velocity <= 0)
+                if (onGround || d2d.Y + velocity >= ((Description2D)location.Description).Height || d2d.Y + velocity <= 0)
                 {
                     velocityDirection = -velocityDirection;
                     velocity = 0;
@@ -176,14 +186,17 @@ namespace Game
             }
             if (Program.Keyboard[(int)Actions.LEFT].IsDown())
             {
-                d2d.ChangeCoordsDelta(-speed, 0);
+                Move(d2d, -speed, 0, walls);
             }
 
             if (velocityDirection > 0)
             {
                 if (d2d.Y + velocity <= ((Description2D)location.Description).Height)
                 {
-                    d2d.ChangeCoordsDelta(0, velocity);
+                    if (!Move(d2d, 0, velocity, walls))
+                    {
+                        velocity = 0;
+                    }
                 }
                 else
                 {
@@ -194,7 +207,10 @@ namespace Game
             {
                 if (d2d.Y + velocity >= 0)
                 {
-                    d2d.ChangeCoordsDelta(0, velocity);
+                    if (!Move(d2d, 0, velocity, walls))
+                    {
+                        velocity = 0;
+                    }
                 }
                 else
                 {

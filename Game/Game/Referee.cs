@@ -15,7 +15,7 @@ namespace Game
 
         public bool IsStarted { get; private set; }
 
-        public bool OutofControl { get; private set; }
+        public bool OutofControl { get; set; }
 
         public Dictionary<Rule.RuleType, Stack<Rule>> Piles { get; private set; }
 
@@ -71,7 +71,10 @@ namespace Game
                             Piles[popType].Pop();
                         }
 
-                        stack.Pop();
+                        if (stack.Any())
+                        {
+                            stack.Pop();
+                        }
                     }
                     else if (stack.Peek().Type != Rule.RuleType.SPAWN || Timer % Program.TPS == 0)
                     {

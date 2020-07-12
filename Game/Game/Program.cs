@@ -19,7 +19,7 @@ namespace Game
         public const int ScreenWidth = 320;
         public const int Scale = 2;
 
-        public const int STARTINGLEVEL = 1;
+        public static int StartingLevel = 1;
         public static int Level = 0;
 
         public static bool CreditsFinished = true;
@@ -144,6 +144,7 @@ namespace Game
                         default:
                             if (CreditsFinished)
                             {
+                                StartingLevel = Level;
                                 Levels[Level - 1].SetupLevel();
                             }
                             break;
@@ -153,6 +154,10 @@ namespace Game
                     if (Program.Diff == Difficulty.NORMAL && Level == 7)
                     {
                         Lives = 3;
+                    }
+                    else if (Program.Diff == Difficulty.EASY && Level == 7)
+                    {
+                        Lives = 2;
                     }
                     else
                     {
@@ -309,7 +314,23 @@ namespace Game
                         logoDescription.ImageIndex = 0;
 
                         Engine.AddEntity(Text.Create("RuleScramble", new Font("", 24, FontStyle.Italic | FontStyle.Bold | FontStyle.Underline), ScreenWidth / 2, 16));
-                        Engine.AddEntity(Button.Create("Story Mode", Levels[STARTINGLEVEL - 1].SetupLevel, ScreenWidth / 2 - 128 / 2, ScreenHeight / 2 - 48));
+                        Engine.AddEntity(Button.Create("Story Mode", () =>
+                        {
+                            Levels[StartingLevel - 1].SetupLevel();
+
+                            if (Program.Diff == Difficulty.NORMAL && Level == 7)
+                            {
+                                Lives = 3;
+                            }
+                            else if (Program.Diff == Difficulty.EASY && Level == 7)
+                            {
+                                Lives = 2;
+                            }
+                            else
+                            {
+                                Lives = 1;
+                            }
+                        }, ScreenWidth / 2 - 128 / 2, ScreenHeight / 2 - 48));
                         Engine.AddEntity(Button.Create("Arcade Mode", SetupCrazyMode, ScreenWidth / 2 - 128 / 2, ScreenHeight / 2 + 8));
                         Engine.AddEntity(Button.Create("Credits", SetupCredits, ScreenWidth / 2 - 128 / 2, ScreenHeight / 2 + 64));
 

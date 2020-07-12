@@ -227,6 +227,9 @@ namespace Game
                 window.Position = originalWindowPosition;
 
                 health--;
+                savedHealth = 100;
+                savedStealAttack = 0;
+                savedShiftRoom = false;
             }
 
             if (health <= 0)

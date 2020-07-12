@@ -362,6 +362,8 @@ namespace Game
                         Engine.AddEntity(Button.Create("Arcade Mode", SetupCrazyMode, ScreenWidth / 2 - 128 / 2, ScreenHeight / 2 + 8));
                         Engine.AddEntity(Button.Create("Credits", SetupCredits, ScreenWidth / 2 - 128 / 2, ScreenHeight / 2 + 64));
 
+
+                        Engine.AddEntity(Text.Create("Story:", new Font("Arial", 10, FontStyle.Regular), ScreenWidth / 2 + 112, ScreenHeight / 2 - 40));
                         Button easyButton = null;
                         Button normalButton = null; 
                         Button hardButton = null;
@@ -372,7 +374,7 @@ namespace Game
                             easyButton.IsSelected = true;
                             normalButton.IsSelected = false;
                             hardButton.IsSelected = false;
-                        }, ScreenWidth / 2 + 80, ScreenHeight / 2 - 48, 64, 32);
+                        }, ScreenWidth / 2 + 80, ScreenHeight / 2 - 16, 64, 32);
                         Engine.AddEntity(button);
                         easyButton = button.Description as Button;
                         if (Program.Diff == Difficulty.EASY)
@@ -386,7 +388,7 @@ namespace Game
                             easyButton.IsSelected = false;
                             normalButton.IsSelected = true;
                             hardButton.IsSelected = false;
-                        }, ScreenWidth / 2 + 80, ScreenHeight / 2 - 16, 64, 32);
+                        }, ScreenWidth / 2 + 80, ScreenHeight / 2 + 16, 64, 32);
                         Engine.AddEntity(button);
                         normalButton = button.Description as Button;
                         if (Program.Diff == Difficulty.NORMAL)
@@ -400,13 +402,15 @@ namespace Game
                             easyButton.IsSelected = false;
                             normalButton.IsSelected = false;
                             hardButton.IsSelected = true;
-                        }, ScreenWidth / 2 + 80, ScreenHeight / 2 + 16, 64, 32);
+                        }, ScreenWidth / 2 + 80, ScreenHeight / 2 + 48, 64, 32);
                         Engine.AddEntity(button);
                         hardButton = button.Description as Button;
                         if (Program.Diff == Difficulty.HARD)
                         {
                             hardButton.IsSelected = true;
                         }
+
+                        Engine.AddEntity(Text.Create("Controls:\nWASD+Mouse\nR: Reset\nEsc: Title", new Font("Arial", 10, FontStyle.Regular), ScreenWidth / 8 + 8, ScreenHeight / 2 + 48));
                     }
                 }
             };

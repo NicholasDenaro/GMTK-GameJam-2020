@@ -22,7 +22,7 @@ namespace Game.Levels
             deck.Push(() =>
             {
                 Program.Referee.AddRule(Rule.Rules["Player pickup Powerup"]);
-                Program.Engine.AddEntity(DialogBox.Create("Oh, maybe now I can collect it."));
+                Program.Engine.AddEntity(DialogBox.Create("I bet I can collect it now."));
                 dialogShown = false;
             });
 
@@ -40,7 +40,7 @@ namespace Game.Levels
                         }
                         else
                         {
-                            Program.Engine.AddEntity(DialogBox.Create("Oh, now I can use the goal."));
+                            Program.Engine.AddEntity(DialogBox.Create("Time to reach the goal."));
                         }
                         dialogShown = true;
                     }

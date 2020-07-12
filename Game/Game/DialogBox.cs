@@ -52,10 +52,10 @@ namespace Game
                 //Program.WavProvider.RemoveMixerInput(sound);
                 //Program.WavProvider.RemoveAllMixerInputs();
                 sound.Amplitude = 0;
-                Program.WavPlayer.Stop();
+                //Program.WavPlayer.Stop();
             }
 
-            if (index == 0 && Program.WavPlayer.PlaybackState == PlaybackState.Stopped)
+            if (sound == null)
             {
                 Bloop();
             }

@@ -41,14 +41,9 @@ namespace Game
 
         private void Tick(Location location, Entity entity)
         {
-            if (Program.WavPlayer.PlaybackState == PlaybackState.Stopped && sound == null)
+            if (sound == null)
             {
                 Jingle();
-            }
-
-            if (sound != null && sound.IsFinished)
-            {
-                Program.WavPlayer.Stop();
             }
         }
 

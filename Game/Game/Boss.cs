@@ -19,7 +19,7 @@ namespace Game
         private int stealAttack = Program.Diff == Program.Difficulty.EASY ? savedStealAttack : 0; // 0
         private bool shiftRoom = Program.Diff == Program.Difficulty.EASY ? savedShiftRoom : false; // false
 
-        public static int savedHealth = 100;
+        public static int savedHealth = 81;
         private static int savedStealAttack = 0;
         private static bool savedShiftRoom = false;
 
@@ -96,6 +96,28 @@ namespace Game
                 attackTimerMax = 30;
                 Program.Referee.AddRule(Rule.Rules["Goal hurty"]);
                 firstTransitionShown = true;
+
+                sound.Silent = true;
+
+                sound = new SinWaveSound(true,
+                120, 44100 / Program.TPS * 10, 150, 44100 / Program.TPS * 15,
+                180, 44100 / Program.TPS * 5, 200, 44100 / Program.TPS * 5,
+
+                0, 44100 / Program.TPS * 15,
+
+                200, 44100 / Program.TPS * 5, 180, 44100 / Program.TPS * 10,
+                200, 44100 / Program.TPS * 15, 150, 44100 / Program.TPS * 5,
+
+                0, 44100 / Program.TPS * 15,
+
+                150, 44100 / Program.TPS * 10, 100, 44100 / Program.TPS * 15,
+                180, 44100 / Program.TPS * 5, 150, 44100 / Program.TPS * 5,
+
+                0, 44100 / Program.TPS * 15);
+                sound.SetWaveFormat(44100, 2);
+
+                Program.WavProvider.AddMixerInput((ISampleProvider)sound);
+                Program.WavPlayer.Play();
             }
 
             if (health == 70 && stealAttack == 0)
@@ -126,12 +148,20 @@ namespace Game
 
                 for (int i = 0; i < 4; i++)
                 {
-                    Entity wall = Powerup.Create("pop SPEED", Program.ScreenWidth / 2 - 80 + i * 16, Program.ScreenHeight / 2);
+                    Entity wall = Powerup.Create("pop SPAWN", Program.ScreenWidth / 2 - 80 + i * 16, Program.ScreenHeight / 2);
                     centerWalls.Add(wall.Id);
                     location.AddEntity(wall);
                 }
 
                 attackTimerMax = 30;
+
+                sound.Silent = true;
+
+                sound = new SinWaveSound(true);
+                sound.SetWaveFormat(44100, 2);
+
+                Program.WavProvider.AddMixerInput((ISampleProvider)sound);
+                Program.WavPlayer.Play();
             }
 
             if (health == 50 && stealAttack == 1)
@@ -159,6 +189,7 @@ namespace Game
                 savedHealth = 41;
                 savedStealAttack = stealAttack;
                 savedShiftRoom = shiftRoom;
+                Program.Referee.AddRule("oop SPEED");
                 Program.Referee.AddRule("top-down");
                 Program.Referee.AddRule("Enemy hurty");
                 attackTimer = 30;
@@ -195,6 +226,14 @@ namespace Game
                         centerWalls.Add(rotaty.Id);
                         location.AddEntity(rotaty);
                     }
+
+                    sound.Silent = true;
+
+                    sound = new SinWaveSound(true);
+                    sound.SetWaveFormat(44100, 2);
+
+                    Program.WavProvider.AddMixerInput((ISampleProvider)sound);
+                    Program.WavPlayer.Play();
                 }
             }
 
@@ -227,6 +266,14 @@ namespace Game
 
                 originalWindowPosition = window.Position;
                 finalTransitionShown = true;
+
+                sound.Silent = true;
+
+                sound = new SinWaveSound(true);
+                sound.SetWaveFormat(44100, 2);
+
+                Program.WavProvider.AddMixerInput((ISampleProvider)sound);
+                Program.WavPlayer.Play();
             }
 
             if (health == 0)
@@ -312,7 +359,7 @@ namespace Game
 
                     for (int i = 0; i < 6; i++)
                     {
-                        location.AddEntity(Powerup.Create("pop SPEED", Program.ScreenWidth, y + 16 + 16 * i).AddTickAction((l, e) =>
+                        location.AddEntity(Powerup.Create("pop SPAWN", Program.ScreenWidth, y + 16 + 16 * i).AddTickAction((l, e) =>
                         {
                             if (Program.Engine.Location.GetEntities<DialogBox>().Any())
                             {

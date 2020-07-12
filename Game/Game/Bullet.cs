@@ -25,7 +25,7 @@ namespace Game
         private void Boom()
         {
             sound = new SinWaveSound(
-                200f, 44100 / Program.TPS, 100, 44100 / Program.TPS * 2, 200, 44100 / Program.TPS * 4);
+                200f, 44100 / Program.TPS, 100, 44100 / Program.TPS * 2, 80, 44100 / Program.TPS, 160, 44100 / Program.TPS, 80, 44100 / Program.TPS, 160, 44100 / Program.TPS, 80, 44100 / Program.TPS, 160, 44100 / Program.TPS);
 
             sound.SetWaveFormat(44100, 2);
 

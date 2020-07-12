@@ -47,6 +47,8 @@ namespace Game
 
         public static Referee Referee { get; private set; }
 
+        public static bool ShowDiags { get; private set; }
+
         public static void Main(string[] args)
         {
             Keyboard = new WindowsKeyController(keyMap.ToDictionary(kvp => (int)kvp.Key, kvp => (int)kvp.Value));
@@ -86,6 +88,11 @@ namespace Game
                 if (Program.Keyboard[(int)Actions.ESCAPE].IsPress())
                 {
                     SetupTitleScreen();
+                }
+
+                if (Program.Keyboard[(int)Actions.DIAGS].IsPress())
+                {
+                    ShowDiags = !ShowDiags;
                 }
 
                 if (Program.Keyboard[(int)Actions.RESTART].IsPress())
@@ -779,6 +786,7 @@ namespace Game
         public static Dictionary<Avalonia.Input.Key, Actions> keyMap 
             = new Dictionary<Avalonia.Input.Key, Actions>(new[]
             {
+                new KeyValuePair<Avalonia.Input.Key, Actions>(Avalonia.Input.Key.F2, Actions.DIAGS),
                 new KeyValuePair<Avalonia.Input.Key, Actions>(Avalonia.Input.Key.Escape, Actions.ESCAPE),
                 new KeyValuePair<Avalonia.Input.Key, Actions>(Avalonia.Input.Key.R, Actions.RESTART),
                 new KeyValuePair<Avalonia.Input.Key, Actions>(Avalonia.Input.Key.W, Actions.UP),
@@ -795,6 +803,6 @@ namespace Game
                 new KeyValuePair<Avalonia.Input.PointerUpdateKind, Actions>(Avalonia.Input.PointerUpdateKind.Other, Actions.MOUSEINFO)
             });
 
-        public enum Actions { UP, DOWN, LEFT, RIGHT, ACTION, CANCEL, MOUSEINFO, ESCAPE, RESTART };
+        public enum Actions { UP, DOWN, LEFT, RIGHT, ACTION, CANCEL, MOUSEINFO, ESCAPE, RESTART, DIAGS };
     }
 }

@@ -22,9 +22,12 @@ namespace Game
 
             Font f = new Font("Arial", 12);
             StringFormat format = new StringFormat();
-            gfx.DrawString($"tps: {Program.Builder.tps}", f, Brushes.Black, new Point(0, Program.ScreenHeight * Program.Scale - 48), format);
-            gfx.DrawString($"tick: {Program.Builder.tickTime}", f, Brushes.Black, new Point(0, Program.ScreenHeight * Program.Scale - 32), format);
-            gfx.DrawString($"draw: {Program.Builder.drawTime}", f, Brushes.Black, new Point(0, Program.ScreenHeight * Program.Scale - 16), format);
+            if (Program.ShowDiags)
+            {
+                gfx.DrawString($"tps: {Program.Builder.tps}", f, Brushes.Black, new Point(0, Program.ScreenHeight * Program.Scale - 48), format);
+                gfx.DrawString($"tick: {Program.Builder.tickTime}", f, Brushes.Black, new Point(0, Program.ScreenHeight * Program.Scale - 32), format);
+                gfx.DrawString($"draw: {Program.Builder.drawTime}", f, Brushes.Black, new Point(0, Program.ScreenHeight * Program.Scale - 16), format);
+            }
 
             format.Alignment = StringAlignment.Far;
             int i = 0;

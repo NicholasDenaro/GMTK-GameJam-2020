@@ -19,14 +19,20 @@ namespace Game.Levels
 
             Program.Engine.SetLocation(new Location(new Description2D(0, 0, Program.ScreenWidth, Program.ScreenHeight)));
 
+            Entity entb = Boss.Create(Program.ScreenHeight - 16, Program.ScreenHeight / 2);
+            Program.Engine.AddEntity(entb);
+
             Stack<Action> deck = new Stack<Action>();
-            deck.Push(() =>
+            if (Boss.savedHealth == 100)
             {
-                Program.Engine.AddEntity(Powerup.Create("shoot Boss", Program.ScreenWidth - 128, Program.ScreenHeight / 2));
-                Program.Engine.AddEntity(DialogBox.Create("I just need to get close enough..."));
-            });
-            deck.Push(() => Program.Engine.AddEntity(DialogBox.Create("This isn't good. I have to do something.")));
-            deck.Push(() => { });
+                deck.Push(() =>
+                {
+                    Program.Engine.AddEntity(Powerup.Create("shoot Boss", Program.ScreenWidth - 128, Program.ScreenHeight / 2));
+                    Program.Engine.AddEntity(DialogBox.Create("I just need to get close enough..."));
+                });
+                deck.Push(() => Program.Engine.AddEntity(DialogBox.Create("This isn't good. I have to do something.")));
+                deck.Push(() => { });
+            }
 
             Program.Referee.ClearRules();
 
@@ -85,8 +91,6 @@ namespace Game.Levels
             Program.Engine.AddEntity(Wall.Create(0, Program.ScreenHeight, Program.ScreenWidth + 16, 16));
 
             Program.Engine.AddEntity(HeadsUpDisplay.Create());
-
-            Program.Engine.AddEntity(Boss.Create(Program.ScreenHeight - 16, Program.ScreenHeight / 2));
 
             Program.Referee.ResetTimer(Program.TPS * 180);
 

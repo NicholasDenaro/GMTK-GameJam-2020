@@ -30,6 +30,11 @@ namespace Game
 
         private void Tick(Location location, Entity entity)
         {
+            if (Program.Engine.Location.GetEntities<DialogBox>().Any())
+            {
+                return;
+            }
+
             Description2D d2d = entity.Description as Description2D;
             d2d.ChangeCoordsDelta(Math.Cos(dir) * 8, Math.Sin(dir) * 8);
             foreach (T enemy in location.GetEntities<T>())

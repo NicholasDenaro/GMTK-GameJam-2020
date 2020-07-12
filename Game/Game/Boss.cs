@@ -18,7 +18,7 @@ namespace Game
         private int stealAttack = Program.Diff == Program.Difficulty.EASY ? savedStealAttack : 0; // 0
         private bool shiftRoom = Program.Diff == Program.Difficulty.EASY ? savedShiftRoom : false; // false
 
-        private static int savedHealth = 100;
+        public static int savedHealth = 100;
         private static int savedStealAttack = 0;
         private static bool savedShiftRoom = false;
 
@@ -34,6 +34,11 @@ namespace Game
         private TickHandler windowAction = null;
 
         private Avalonia.PixelPoint originalWindowPosition;
+        
+        private static string machineName = Environment.MachineName;
+
+        private bool firstTransitionShown = false;
+        private bool finalTransitionShown = false;
 
         public Boss(int x, int y) : base(Sprite.Sprites["boss"], x, y, 80, 80)
         {
@@ -51,6 +56,11 @@ namespace Game
 
         private void Tick(Location location, Entity entity)
         {
+            if (Program.Engine.Location.GetEntities<DialogBox>().Any())
+            {
+                return;
+            }
+
             foreach (Bullet<BulletNull> bullet in location.GetEntities<Bullet<BulletNull>>())
             {
                 if (bullet.IsCollision(this))
@@ -60,18 +70,21 @@ namespace Game
                 }
             }
 
-            if (health == 80)
+            if (health == 80 && !firstTransitionShown)
             {
+                Program.Engine.AddEntity(DialogBox.Create($"[{machineName}] Try this on for size. >=^)"));
                 savedHealth = 81;
                 savedStealAttack = stealAttack;
                 savedShiftRoom = shiftRoom;
                 Program.Referee.AddRule("platformer");
                 attackTimerMax = 30;
                 Program.Referee.AddRule(Rule.Rules["Goal hurty"]);
+                firstTransitionShown = true;
             }
 
             if (health == 70 && stealAttack == 0)
             {
+                Program.Engine.AddEntity(DialogBox.Create($"[{machineName}] Quit it with that. >=^("));
                 Program.Referee.AddRule("no attack. haha.");
                 location.AddEntity(Powerup.Create("shoot Boss", Program.ScreenWidth - 64, Program.ScreenHeight - 16));
                 stealAttack++;
@@ -84,6 +97,7 @@ namespace Game
 
             if (health == 60 && !shiftRoom)
             {
+                Program.Engine.AddEntity(DialogBox.Create($"[{machineName}] I bet you can't handle\nthis. >=^)"));
                 savedHealth = 61;
                 savedStealAttack = stealAttack;
                 savedShiftRoom = shiftRoom;
@@ -106,6 +120,7 @@ namespace Game
 
             if (health == 50 && stealAttack == 1)
             {
+                Program.Engine.AddEntity(DialogBox.Create($"[{machineName}] I'll just take that\nagain. >=^D"));
                 Program.Referee.AddRule("no attack. haha.");
                 Entity trigger = Powerup.Create("shoot Boss", Program.ScreenWidth - 128, Program.ScreenHeight / 2);
                 Guid triggerId = trigger.Id;
@@ -124,6 +139,7 @@ namespace Game
 
             if (health == 40 && shiftRoom)
             {
+                Program.Engine.AddEntity(DialogBox.Create($"[{machineName}] Why don't you\njust go? [ o\\ _ /o ]"));
                 savedHealth = 41;
                 savedStealAttack = stealAttack;
                 savedShiftRoom = shiftRoom;
@@ -148,6 +164,10 @@ namespace Game
 
                         Entity rotaty = Enemy.Create(Program.ScreenWidth / 2 + xoffset, Program.ScreenHeight / 2 + yoffset).AddTickAction((loc, ent) =>
                         {
+                            if (Program.Engine.Location.GetEntities<DialogBox>().Any())
+                            {
+                                return;
+                            }
                             Description2D enemyd = ent.Description as Description2D;
 
                             double instantdir = enemyd.Direction(new Point(Program.ScreenWidth / 2, Program.ScreenHeight / 2));
@@ -164,13 +184,15 @@ namespace Game
 
             if (health == 30 && stealAttack == 2)
             {
+                Program.Engine.AddEntity(DialogBox.Create($"[{machineName}] Good luck getting\nit back. [ x\\ _ /o ]"));
                 Program.Referee.AddRule("no attack. haha.");
                 location.AddEntity(Powerup.Create("shoot Boss", Program.ScreenWidth - 128, Program.ScreenHeight / 2));
                 stealAttack++;
             }
 
-            if (health == 20)
+            if (health == 20 && !finalTransitionShown)
             {
+                Program.Engine.AddEntity(DialogBox.Create($"[{machineName}] STO0oOOo0oOO0OPPpP"));
                 savedHealth = 21;
                 savedStealAttack = stealAttack;
                 savedShiftRoom = shiftRoom;
@@ -188,11 +210,13 @@ namespace Game
                 attackTimerMax = 10;
 
                 originalWindowPosition = window.Position;
+                finalTransitionShown = true;
             }
 
             if (health == 0)
             {
                 location.RemoveEntity(this.Id);
+                Program.Engine.AddEntity(DialogBox.Create($"[{machineName}] NOOOOooOooooOooooooo..."));
                 location.AddEntity(Banner.Create("you win"));
 
                 if (windowAction != null)
@@ -231,7 +255,17 @@ namespace Game
                             + (Program.Random.NextDouble() - 0.5) * Math.PI / 10;
                         location.AddEntity(Enemy.Create((int)this.X, (int)this.Y).AddTickAction((l, e) =>
                         {
+                            if (Program.Engine.Location.GetEntities<DialogBox>().Any())
+                            {
+                                return;
+                            }
                             ((Description2D)e.Description).ChangeCoordsDelta(2 * Math.Cos(dir), 2 * Math.Sin(dir));
+                            Enemy ed = (Enemy)e.Description;
+                            if (ed.X < 0 || ed.Y < 0 || ed.X > Program.ScreenWidth || ed.Y > Program.ScreenHeight)
+                            {
+                                l.RemoveEntity(ed.Id);
+                            }
+
                         }));
                     }
                 }
@@ -244,6 +278,10 @@ namespace Game
                     {
                         location.AddEntity(Goal.Create(Program.ScreenWidth, Program.ScreenHeight - 16 - 16 * i).AddTickAction((l, e) =>
                         {
+                            if (Program.Engine.Location.GetEntities<DialogBox>().Any())
+                            {
+                                return;
+                            }
                             ((Description2D)e.Description).ChangeCoordsDelta(-5, 0);
                         }));
                     }
@@ -257,6 +295,10 @@ namespace Game
                     {
                         location.AddEntity(Powerup.Create("pop SPEED", Program.ScreenWidth, y + 16 + 16 * i).AddTickAction((l, e) =>
                         {
+                            if (Program.Engine.Location.GetEntities<DialogBox>().Any())
+                            {
+                                return;
+                            }
                             ((Description2D)e.Description).ChangeCoordsDelta(-5, 0);
                         }));
                     }
@@ -270,6 +312,10 @@ namespace Game
                     double delta = 0;
                     location.AddEntity(Enemy.Create(Program.ScreenWidth, yPos).AddTickAction((l, e) =>
                     {
+                        if (Program.Engine.Location.GetEntities<DialogBox>().Any())
+                        {
+                            return;
+                        }
                         ((Description2D)e.Description).ChangeCoordsDelta(-delta, 0);
                         delta += 0.25;
                     }));
@@ -291,6 +337,10 @@ namespace Game
 
                     windowAction = (s, gs) =>
                     {
+                        if (Program.Engine.Location.GetEntities<DialogBox>().Any())
+                        {
+                            return;
+                        }
                         double shake = Program.Random.NextDouble() * Math.PI / 8;
 
                         window.Position = window.Position

@@ -47,7 +47,7 @@ namespace Game.Levels
             int timer = 0;
             deckFlipper.TickAction = (loc, ent) =>
             {
-                if (Program.Engine.Location.GetEntities<DialogBox>().Any())
+                if (Program.Engine.Location.GetEntities<DialogBox>().Any() || Program.Engine.Location.GetEntities<Banner>().Any())
                 {
                     return;
                 }

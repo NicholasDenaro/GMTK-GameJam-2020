@@ -19,7 +19,7 @@ namespace Game
         public const int ScreenWidth = 320;
         public const int Scale = 2;
 
-        public const int STARTINGLEVEL = 6;
+        public const int STARTINGLEVEL = 1;
         public static int Level = 0;
 
         public static bool CreditsFinished = true;
@@ -125,8 +125,12 @@ namespace Game
                         case 9:
                             if (CreditsFinished)
                             {
-                                SetupTitleScreen();
+                                SetupThanksForPlaying();
+                                Level = 10;
                             }
+                            break;
+                        case 10:
+                            SetupTitleScreen();
                             break;
                         default:
                             if (CreditsFinished)
@@ -178,7 +182,7 @@ namespace Game
             Program.Referee.AddRule(Rule.Rules["Goal victory"]);
 
             Engine.SetLocation(new Location(new Description2D(0, 0, ScreenWidth, ScreenHeight)));
-            Engine.AddEntity(Player.Create(Program.ScreenWidth / 2, Program.ScreenHeight / 2));
+            Engine.AddEntity(Player.Create(Program.ScreenWidth / 4, Program.ScreenHeight / 2));
 
             Point center = new Point(Program.ScreenWidth * 3 / 4, Program.ScreenHeight / 2);
 
@@ -255,6 +259,13 @@ namespace Game
 
             Engine.AddEntity(Text.Create("Special thanks to", new Font("Arial", 16, FontStyle.Underline), ScreenWidth / 2, y + 192).AddTickAction(scroll));
             Engine.AddEntity(Text.Create("My faithful Twitch chat <3", new Font("Arial", 10), ScreenWidth / 2, y + 224).AddTickAction(scroll));
+        }
+
+        public static void SetupThanksForPlaying()
+        {
+            Engine.SetLocation(new Location(new Description2D(0, 0, ScreenWidth, ScreenHeight)));
+
+            Engine.AddEntity(Text.Create("Thanks for playing!", new Font("Arial", 24), ScreenWidth / 2, ScreenHeight / 2 - 24));
         }
 
         public static void SetupTitleScreen()
@@ -547,6 +558,11 @@ namespace Game
 
             new Rule("shoot Enemy", Rule.RuleType.ATTACK, (location, obj) =>
             {
+                if (location.GetEntities<DialogBox>().Any())
+                {
+                    return;
+                }
+
                 if (Program.Mouse[(int)Program.Actions.ACTION].IsPress())
                 {
                     MouseControllerInfo mci = Program.Mouse[(int)Program.Actions.ACTION].Info as MouseControllerInfo;
@@ -568,6 +584,11 @@ namespace Game
             int shootTimer = 15;
             new Rule("shoot Boss", Rule.RuleType.ATTACK, (location, obj) =>
             {
+                if (location.GetEntities<DialogBox>().Any())
+                {
+                    return;
+                }
+
                 if (shootTimer-- <= 0 && Program.Mouse[(int)Program.Actions.ACTION].IsDown())
                 {
                     shootTimer = 15;

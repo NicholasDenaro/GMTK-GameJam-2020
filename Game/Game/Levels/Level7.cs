@@ -10,6 +10,8 @@ namespace Game.Levels
 {
     public class Level7 : Level
     {
+        public static bool introDialogShown = false;
+
         public override void SetupLevel()
         {
             Program.Level = 7;
@@ -17,32 +19,59 @@ namespace Game.Levels
             Program.Engine.SetLocation(new Location(new Description2D(0, 0, Program.ScreenWidth, Program.ScreenHeight)));
 
             Stack<Action> deck = new Stack<Action>();
+            deck.Push(() =>
+            {
+                Program.Engine.AddEntity(Powerup.Create("shoot Boss", Program.ScreenWidth - 128, Program.ScreenHeight / 2));
+                Program.Engine.AddEntity(DialogBox.Create("I just need to get close enough..."));
+            });
+            deck.Push(() => Program.Engine.AddEntity(DialogBox.Create("This isn't good. I have to do something.")));
             deck.Push(() => { });
 
             Program.Referee.ClearRules();
 
             Program.Referee.AddRule(Rule.Rules["Enemy hurty"]);
-            Program.Referee.AddRule(Rule.Rules["shoot Boss"]);
             Program.Referee.AddRule(Rule.Rules["Player pickup Powerup"]);
             Program.Referee.AddRule(Rule.Rules["control Player"]);
             Program.Referee.AddRule(Rule.Rules["top-down"]);
+
+            if(Program.Diff == Program.Difficulty.EASY && Boss.savedHealth < 100)
+            {
+                Program.Referee.AddRule(Rule.Rules["shoot Boss"]);
+            }
 
             Entity deckFlipper = new Entity(new Description2D(0, 0, 0, 0));
             int timer = 0;
             deckFlipper.TickAction = (loc, ent) =>
             {
-                if (Program.Engine.Location.GetEntities<DialogBox>().Any())
+                if (Program.Engine.Location.GetEntities<DialogBox>().Any() || Program.Engine.Location.GetEntities<Banner>().Any())
                 {
                     return;
                 }
 
-                if (Program.Referee.IsStarted && deck.Any() && timer++ % (Program.TPS * 5) == 0)
+                if (Program.Referee.IsStarted && deck.Any() && timer++ % (Program.TPS * 10) == 0)
                 {
                     deck.Pop().Invoke();
                 }
             };
 
             Program.Engine.AddEntity(deckFlipper);
+
+            string machineName = Environment.MachineName;
+
+            if (!introDialogShown)
+            {
+                Program.Engine.AddEntity(
+                    DialogBox.Create("[???]: What where did you come from?",
+                        DialogBox.Create("Who are you?",
+                            DialogBox.Create($"[???] I am {machineName}.",
+                                DialogBox.Create("That couldn't be true.",
+                                    DialogBox.Create($"[{machineName}] It is. And you're not\nsupposed to be here. It's time\nto delete you."))))));
+                introDialogShown = true;
+            }
+            else
+            {
+                Program.Engine.AddEntity(DialogBox.Create($"[{machineName}] It's time to delete you."));
+            }
 
             Program.Engine.AddEntity(Player.Create(64, Program.ScreenHeight / 2));
 
@@ -55,7 +84,7 @@ namespace Game.Levels
 
             Program.Engine.AddEntity(Boss.Create(Program.ScreenHeight - 16, Program.ScreenHeight / 2));
 
-            Program.Referee.ResetTimer(Program.TPS * 120);
+            Program.Referee.ResetTimer(Program.TPS * 180);
 
             Program.Referee.Start();
         }

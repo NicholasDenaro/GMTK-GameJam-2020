@@ -17,15 +17,18 @@ namespace Game
 
         private static int tick;
 
+        private Entity chain;
+
         private bool IsFinished => Shown.Length == Text.Length;
 
         public Guid Id { get; private set; }
 
-        public DialogBox(string text) : base(Sprite.Sprites["banner"], 0, (Program.ScreenHeight - 64) * Program.Scale)
+        public DialogBox(string text, Entity chain = null) : base(Sprite.Sprites["banner"], 0, (Program.ScreenHeight - 64) * Program.Scale)
         {
             this.Text = text;
             this.DrawInOverlay = true;
             this.Shown = "";
+            this.chain = chain;
         }
 
         private void Tick(Location location, Entity entity)
@@ -41,6 +44,10 @@ namespace Game
             if (IsFinished && Program.Mouse[(int)Program.Actions.ACTION].IsPress())
             {
                 location.RemoveEntity(Id);
+                if (chain != null)
+                {
+                    location.AddEntity(chain);
+                }
             }           
         }
 
@@ -64,9 +71,9 @@ namespace Game
             return bmp;
         }
 
-        public static Entity Create(string text)
+        public static Entity Create(string text, Entity chain = null)
         {
-            DialogBox dialog = new DialogBox(text);
+            DialogBox dialog = new DialogBox(text, chain);
             dialog.DrawAction = dialog.Draw;
             Entity entity = new Entity(dialog);
             entity.TickAction = dialog.Tick;

@@ -410,7 +410,7 @@ namespace Game
                             hardButton.IsSelected = true;
                         }
 
-                        Engine.AddEntity(Text.Create("Controls:\nWASD+Mouse\nR: Reset\nEsc: Title", new Font("Arial", 10, FontStyle.Regular), ScreenWidth / 8 + 8, ScreenHeight / 2 + 48));
+                        Engine.AddEntity(Text.Create("Controls:\nWASD+Mouse\n[Radial\nmove toward\nmouse]\nR: Reset\nEsc: Title", new Font("Arial", 10, FontStyle.Regular), ScreenWidth / 8 + 8, ScreenHeight / 2 - 48));
                     }
                 }
             };

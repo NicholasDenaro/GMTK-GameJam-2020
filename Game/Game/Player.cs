@@ -24,7 +24,15 @@ namespace Game
         {
             Bitmap bmp = BitmapExtensions.CreateBitmap(16, 16);
             Graphics gfx = Graphics.FromImage(bmp);
-            gfx.FillEllipse(new SolidBrush(Color), 0, 0, 16, 16);
+
+            Color color = Color;
+
+            if (Program.Iframe > 0)
+            {
+                color = Color.PaleVioletRed;
+            }
+
+            gfx.FillEllipse(new SolidBrush(color), 0, 0, 16, 16);
 
             return bmp;
         }

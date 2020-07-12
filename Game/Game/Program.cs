@@ -173,7 +173,7 @@ namespace Game
                     }
                     else if (Program.Diff == Difficulty.EASY && Level == 7)
                     {
-                        Lives = 2;
+                        Lives = 4;
                     }
                     else
                     {
@@ -352,7 +352,7 @@ namespace Game
                             }
                             else if (Program.Diff == Difficulty.EASY && Level == 7)
                             {
-                                Lives = 2;
+                                Lives = 4;
                             }
                             else
                             {

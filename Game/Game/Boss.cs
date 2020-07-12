@@ -1,6 +1,7 @@
 ﻿using GameEngine;
 using GameEngine._2D;
 using GameEngine.UI.AvaloniaUI;
+using NAudio.Wave;
 using System;
 using System.Collections.Generic;
 using System.Drawing;
@@ -40,6 +41,8 @@ namespace Game
         private bool firstTransitionShown = false;
         private bool finalTransitionShown = false;
 
+        private SinWaveSound sound;
+
         public Boss(int x, int y) : base(Sprite.Sprites["boss"], x, y, 80, 80)
         {
         }
@@ -59,6 +62,19 @@ namespace Game
             if (Program.Engine.Location.GetEntities<DialogBox>().Any())
             {
                 return;
+            }
+
+            if (sound == null)
+            {
+                sound = new SinWaveSound(true,
+                120, 44100 / Program.TPS * 20, 150, 44100 / Program.TPS * 30,
+                120, 44100 / Program.TPS * 10f, 0, 44100 / Program.TPS * 10f, 180, 44100 / Program.TPS * 5,
+                150, 44100 / Program.TPS * 20, 100, 44100 / Program.TPS * 30,
+                180, 44100 / Program.TPS * 10f, 0, 44100 / Program.TPS * 10f, 200, 44100 / Program.TPS * 5);
+                sound.SetWaveFormat(44100, 2);
+
+                Program.WavProvider.AddMixerInput((ISampleProvider)sound);
+                Program.WavPlayer.Play();
             }
 
             foreach (Bullet<BulletNull> bullet in location.GetEntities<Bullet<BulletNull>>())

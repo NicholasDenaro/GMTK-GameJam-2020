@@ -107,7 +107,7 @@ namespace Game
 
                 if (Program.Keyboard[(int)Actions.RESTART].IsPress())
                 {
-                    if (Program.Referee.OutofControl && !Engine.Location.GetEntities<Banner>().Any())
+                    if ((Program.Referee.OutofControl || Program.Level == 7) && !Engine.Location.GetEntities<Banner>().Any())
                     {
                         return;
                     }

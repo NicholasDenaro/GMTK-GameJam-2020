@@ -77,7 +77,7 @@ namespace Game
 
                 amp = Quiet ? amp / 2 : amp;
 
-                buffer[n + offset] = (float)(amp * Math.Sin((2 * Math.PI * sample * f) / sampleRate));
+                buffer[n + offset] = (float)(amp * Math.Clamp(Math.Sin((2 * Math.PI * sample * f) / sampleRate), -0.5, 0.5) * 2);
                 sample++;
                 if (sample >= sampleRate) sample = 0;
             }

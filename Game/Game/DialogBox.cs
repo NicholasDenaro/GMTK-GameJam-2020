@@ -1,8 +1,11 @@
 ﻿using GameEngine;
 using GameEngine._2D;
+using NAudio.CoreAudioApi;
+using NAudio.Wave;
+using NAudio.Wave.SampleProviders;
 using System;
 using System.Drawing;
-
+using System.IO;
 
 namespace Game
 {
@@ -23,6 +26,8 @@ namespace Game
 
         public Guid Id { get; private set; }
 
+        SinWaveSound sound;
+
         public DialogBox(string text, Entity chain = null) : base(Sprite.Sprites["banner"], 0, (Program.ScreenHeight - 64) * Program.Scale)
         {
             this.Text = text;
@@ -31,8 +36,30 @@ namespace Game
             this.chain = chain;
         }
 
+        private void Bloop()
+        {
+            sound = new SinWaveSound((int)(44100 / Program.TPS * 1.5), 250, 500);
+            sound.SetWaveFormat(44100, 2);
+
+            Program.WavProvider.AddMixerInput((ISampleProvider)sound);
+            Program.WavPlayer.Play();
+        }
+
         private void Tick(Location location, Entity entity)
         {
+            if (index == Text.Length)
+            {
+                //Program.WavProvider.RemoveMixerInput(sound);
+                //Program.WavProvider.RemoveAllMixerInputs();
+                sound.Amplitude = 0;
+                Program.WavPlayer.Stop();
+            }
+
+            if (index == 0 && Program.WavPlayer.PlaybackState == PlaybackState.Stopped)
+            {
+                Bloop();
+            }
+
             if (Program.Mouse[(int)Program.Actions.ACTION].IsDown())
             {
                 if (index < Text.Length)

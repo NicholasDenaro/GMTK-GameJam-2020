@@ -4,6 +4,9 @@ using GameEngine;
 using GameEngine._2D;
 using GameEngine.UI;
 using GameEngine.UI.AvaloniaUI;
+using NAudio.CoreAudioApi;
+using NAudio.Wave;
+using NAudio.Wave.SampleProviders;
 using System;
 using System.Collections.Generic;
 using System.Drawing;
@@ -19,7 +22,7 @@ namespace Game
         public const int ScreenWidth = 320;
         public const int Scale = 2;
 
-        public static int StartingLevel = 7;
+        public static int StartingLevel = 1;
         public static int Level = 0;
 
         public static bool CreditsFinished = true;
@@ -49,8 +52,15 @@ namespace Game
 
         public static bool ShowDiags { get; private set; }
 
+
+
+        public static IWavePlayer WavPlayer { get; private set; } = new WasapiOut(AudioClientShareMode.Shared, 0);
+        public static MixingSampleProvider WavProvider { get; private set; } = new MixingSampleProvider(WaveFormat.CreateIeeeFloatWaveFormat(44100, 2));
+
         public static void Main(string[] args)
         {
+            WavPlayer.Init(WavProvider);
+            WavPlayer.Play();
             Keyboard = new WindowsKeyController(keyMap.ToDictionary(kvp => (int)kvp.Key, kvp => (int)kvp.Value));
             Mouse = new WindowsMouseController(mouseMap.ToDictionary(kvp => (int)kvp.Key, kvp => (int)kvp.Value));
 
@@ -117,6 +127,8 @@ namespace Game
                         }
                     }
 
+                    Program.WavPlayer.Stop();
+                    Program.WavProvider.RemoveAllMixerInputs();
                     // Levels can call the reset with something different
                     Referee.ResetTimer();
 

@@ -1,5 +1,6 @@
 ﻿using GameEngine;
 using GameEngine._2D;
+using NAudio.Wave;
 using System;
 using System.Collections.Generic;
 using System.Drawing;
@@ -14,9 +15,22 @@ namespace Game
 
         public Guid Id { get; private set; }
 
+        private SinWaveSound sound;
+
         public Bullet(int x, int y, double dir) : base(Sprite.Sprites["bullet"], x, y, 16, 16)
         {
             this.dir = dir;
+        }
+
+        private void Boom()
+        {
+            sound = new SinWaveSound(
+                200f, 44100 / Program.TPS, 100, 44100 / Program.TPS * 2, 200, 44100 / Program.TPS * 4);
+
+            sound.SetWaveFormat(44100, 2);
+
+            Program.WavProvider.AddMixerInput((ISampleProvider)sound);
+            Program.WavPlayer.Play();
         }
 
         private Bitmap Draw()
@@ -33,6 +47,11 @@ namespace Game
             if (Program.Engine.Location.GetEntities<DialogBox>().Any())
             {
                 return;
+            }
+
+            if (sound == null)
+            {
+                Boom();
             }
 
             Description2D d2d = entity.Description as Description2D;

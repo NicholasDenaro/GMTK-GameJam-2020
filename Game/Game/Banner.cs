@@ -1,5 +1,6 @@
 ﻿using GameEngine;
 using GameEngine._2D;
+using NAudio.Wave;
 using System.Drawing;
 
 namespace Game
@@ -8,10 +9,47 @@ namespace Game
     {
         public string Text { get; set; }
 
+        private SinWaveSound sound;
+
         public Banner(string text) : base(Sprite.Sprites["banner"], 0, Program.ScreenHeight * Program.Scale / 2)
         {
             this.Text = text;
             this.DrawInOverlay = true;
+        }
+
+        private void Jingle()
+        {
+            if (Text == "you win")
+            {
+                sound = new SinWaveSound(
+                    500f, 44100 / Program.TPS, 750, 44100 / Program.TPS * 2, 1000, 44100 / Program.TPS * 4, 0, 44100 / Program.TPS,
+                    750, 44100 / Program.TPS, 1000, 44100 / Program.TPS * 2, 1250, 44100 / Program.TPS * 4, 0, 44100 / Program.TPS,
+                    1000, 44100 / Program.TPS, 1250, 44100 / Program.TPS * 2, 1500, 44100 / Program.TPS * 4);
+            }
+            else
+            {
+                sound = new SinWaveSound(
+                    500f, 44100 / Program.TPS, 750, 44100 / Program.TPS * 2, 1000, 44100 / Program.TPS * 4, 0, 44100 / Program.TPS,
+                    500, 44100 / Program.TPS, 400, 44100 / Program.TPS * 2, 300, 44100 / Program.TPS * 10);
+            }
+
+            sound.SetWaveFormat(44100, 2);
+
+            Program.WavProvider.AddMixerInput((ISampleProvider)sound);
+            Program.WavPlayer.Play();
+        }
+
+        private void Tick(Location location, Entity entity)
+        {
+            if (Program.WavPlayer.PlaybackState == PlaybackState.Stopped && sound == null)
+            {
+                Jingle();
+            }
+
+            if (sound != null && sound.IsFinished)
+            {
+                Program.WavPlayer.Stop();
+            }
         }
 
         private Bitmap Draw()
@@ -42,7 +80,9 @@ namespace Game
         {
             Banner banner = new Banner(text);
             banner.DrawAction = banner.Draw;
-            return new Entity(banner);
+            Entity entity = new Entity(banner);
+            entity.TickAction = banner.Tick;
+            return entity;
         }
     }
 }

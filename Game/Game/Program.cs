@@ -97,6 +97,9 @@ namespace Game
 
                 if (Program.Keyboard[(int)Actions.ESCAPE].IsPress())
                 {
+                    Program.WavPlayer.Stop();
+                    Program.WavProvider.RemoveAllMixerInputs();
+                    StopMovingWindow();
                     SetupTitleScreen();
                 }
 
@@ -127,6 +130,7 @@ namespace Game
                         }
                     }
 
+                    StopMovingWindow();
                     Program.WavPlayer.Stop();
                     Program.WavProvider.RemoveAllMixerInputs();
                     // Levels can call the reset with something different
@@ -181,6 +185,18 @@ namespace Game
             Engine.Start();
 
             while (true) { }
+        }
+
+        private static void StopMovingWindow()
+        {
+            Boss boss = Program.Engine.Location.GetEntities<Boss>().FirstOrDefault();
+            if (boss != null)
+            {
+                if (boss.windowAction != null)
+                {
+                    Program.Engine.TickEnd -= boss.windowAction;
+                }
+            }
         }
 
         public static void SetupCrazyMode()

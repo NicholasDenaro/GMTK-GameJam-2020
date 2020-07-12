@@ -19,9 +19,9 @@ namespace Game
         private int stealAttack = Program.Diff == Program.Difficulty.EASY ? savedStealAttack : 0; // 0
         private bool shiftRoom = Program.Diff == Program.Difficulty.EASY ? savedShiftRoom : false; // false
 
-        public static int savedHealth = 81;
+        public static int savedHealth = 41;
         private static int savedStealAttack = 0;
-        private static bool savedShiftRoom = false;
+        private static bool savedShiftRoom = true;
 
         private int attackTimerMax = Program.TPS * 2;
         private int attackTimer = Program.TPS * 3;
@@ -32,7 +32,7 @@ namespace Game
 
         private bool attackTop;
 
-        private TickHandler windowAction = null;
+        public TickHandler windowAction = null;
 
         private Avalonia.PixelPoint originalWindowPosition;
         
@@ -189,7 +189,7 @@ namespace Game
                 savedHealth = 41;
                 savedStealAttack = stealAttack;
                 savedShiftRoom = shiftRoom;
-                Program.Referee.AddRule("oop SPEED");
+                Program.Referee.AddRule("pop SPEED");
                 Program.Referee.AddRule("top-down");
                 Program.Referee.AddRule("Enemy hurty");
                 attackTimer = 30;
@@ -229,7 +229,27 @@ namespace Game
 
                     sound.Silent = true;
 
-                    sound = new SinWaveSound(true);
+                    sound = new SinWaveSound(true,
+                        60, 44100 / Program.TPS * 2,
+                        80, 44100 / Program.TPS * 2,
+                        100, 44100 / Program.TPS * 2,
+                        120, 44100 / Program.TPS * 2,
+
+                        0, 44100 / Program.TPS * 10,
+
+                        100, 44100 / Program.TPS * 2,
+                        120, 44100 / Program.TPS * 2,
+                        140, 44100 / Program.TPS * 2,
+                        160, 44100 / Program.TPS * 2,
+
+                        0, 44100 / Program.TPS * 10,
+
+                        140, 44100 / Program.TPS * 2,
+                        160, 44100 / Program.TPS * 2,
+                        180, 44100 / Program.TPS * 2,
+                        200, 44100 / Program.TPS * 2,
+
+                        0, 44100 / Program.TPS * 10);
                     sound.SetWaveFormat(44100, 2);
 
                     Program.WavProvider.AddMixerInput((ISampleProvider)sound);
@@ -269,7 +289,9 @@ namespace Game
 
                 sound.Silent = true;
 
-                sound = new SinWaveSound(true);
+                sound = new SinWaveSound(true,
+                    100, 44100 / Program.TPS * 10,
+                    0, 44100 / Program.TPS * 10);
                 sound.SetWaveFormat(44100, 2);
 
                 Program.WavProvider.AddMixerInput((ISampleProvider)sound);
@@ -293,6 +315,8 @@ namespace Game
                 savedHealth = 100;
                 savedStealAttack = 0;
                 savedShiftRoom = false;
+
+                sound.Silent = true;
             }
 
             if (health <= 0)

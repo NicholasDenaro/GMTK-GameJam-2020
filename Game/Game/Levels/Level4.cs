@@ -83,7 +83,7 @@ namespace Game.Levels
             {
                 if (!dialogShown && !Program.Referee.Piles[Rule.RuleType.VICTORY].Any() && loc.GetEntities<Player>().First().Distance((Description2D)e.Description) < 12)
                 {
-                    Program.Engine.AddEntity(DialogBox.Create("Hmm? Didn't I start with a victory condition?\nBetter try this again. (Press R)"));
+                    Program.Engine.AddEntity(DialogBox.Create("Hmm? Didn't I start with a victory\ncondition? Better try this again.\n(Press R)"));
                     dialogShown = true;
                 }
             };

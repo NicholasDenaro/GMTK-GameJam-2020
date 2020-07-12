@@ -19,7 +19,7 @@ namespace Game
         public const int ScreenWidth = 320;
         public const int Scale = 2;
 
-        public const int STARTINGLEVEL = 4;
+        public const int STARTINGLEVEL = 6;
         public static int Level = 0;
 
         public static bool CreditsFinished = true;

@@ -15,11 +15,21 @@ namespace Game.Levels
 
             Program.Engine.SetLocation(new Location(new Description2D(0, 0, Program.ScreenWidth, Program.ScreenHeight)));
 
+            bool dialogShown = false;
             Stack<Action> deck = new Stack<Action>();
             deck.Push(() =>
             {
                 Program.Engine.AddEntity(Powerup.Create("pop DEATH", 24, Program.ScreenHeight / 2 - 48));
-                Program.Engine.AddEntity(Powerup.Create("Enemy hurty", 24, Program.ScreenHeight / 2 - 16));
+                Entity ent = Powerup.Create("Enemy hurty", 24, Program.ScreenHeight / 2 - 16);
+                ent.TickAction = (loc, e) =>
+                {
+                    if (!dialogShown && loc.GetEntities<Player>().First().Distance((Description2D)e.Description) < 12)
+                    {
+                        Program.Engine.AddEntity(DialogBox.Create("I'm lucky those were there."));
+                        dialogShown = true;
+                    }
+                };
+                Program.Engine.AddEntity(ent);
             });
             deck.Push(() =>  Program.Engine.AddEntity(Powerup.Create("shoot Enemy", Program.ScreenWidth / 2, Program.ScreenHeight / 2 + 16)));
             deck.Push(() => { });
@@ -49,6 +59,10 @@ namespace Game.Levels
             };
 
             Program.Engine.AddEntity(deckFlipper);
+
+            ControlSchemas.Reset();
+
+            Program.Engine.AddEntity(DialogBox.Create("This feels very different. And powerups\nhurt me? How am I supposed to progress?"));
 
             //top
             Program.Engine.AddEntity(Wall.Create(0, 0, 64, 16));
@@ -100,6 +114,7 @@ namespace Game.Levels
             {
                 if (loc.GetEntities<Player>().First().Distance((Description2D)ent.Description) < 20)
                 {
+                    Program.Engine.AddEntity(DialogBox.Create("WHAT?! I thought they were supposed\nto hurt? Better keep an eye on things."));
                     Program.Referee.AddRule("pop DEATH");
                     loc.RemoveEntity(triggerId);
                 }

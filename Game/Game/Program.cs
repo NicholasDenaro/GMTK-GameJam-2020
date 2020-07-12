@@ -19,7 +19,7 @@ namespace Game
         public const int ScreenWidth = 320;
         public const int Scale = 2;
 
-        public static int StartingLevel = 1;
+        public static int StartingLevel = 7;
         public static int Level = 0;
 
         public static bool CreditsFinished = true;
@@ -347,6 +347,10 @@ namespace Game
                         }, ScreenWidth / 2 + 80, ScreenHeight / 2 - 48, 64, 32);
                         Engine.AddEntity(button);
                         easyButton = button.Description as Button;
+                        if (Program.Diff == Difficulty.EASY)
+                        {
+                            easyButton.IsSelected = true;
+                        }
 
                         button = Button.Create("normal", () =>
                         {
@@ -357,7 +361,10 @@ namespace Game
                         }, ScreenWidth / 2 + 80, ScreenHeight / 2 - 16, 64, 32);
                         Engine.AddEntity(button);
                         normalButton = button.Description as Button;
-                        normalButton.IsSelected = true;
+                        if (Program.Diff == Difficulty.NORMAL)
+                        {
+                            normalButton.IsSelected = true;
+                        }
 
                         button = Button.Create("hard", () =>
                         {
@@ -368,6 +375,10 @@ namespace Game
                         }, ScreenWidth / 2 + 80, ScreenHeight / 2 + 16, 64, 32);
                         Engine.AddEntity(button);
                         hardButton = button.Description as Button;
+                        if (Program.Diff == Difficulty.HARD)
+                        {
+                            hardButton.IsSelected = true;
+                        }
                     }
                 }
             };

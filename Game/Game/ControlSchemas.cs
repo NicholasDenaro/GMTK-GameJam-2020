@@ -118,7 +118,10 @@ namespace Game
 
             if (!onGround)
             {
-                velocity += 1.0;
+                if (velocity < 10)
+                {
+                    velocity += 1.0;
+                }
             }
 
             if (Program.Keyboard[(int)Actions.RIGHT].IsDown())

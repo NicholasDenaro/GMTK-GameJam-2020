@@ -1,5 +1,6 @@
 ﻿using GameEngine;
 using GameEngine._2D;
+using NAudio.Wave;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -42,6 +43,13 @@ namespace Game.Levels
             Program.Referee.AddRule(Rule.Rules["Player pickup Powerup"]);
             Program.Referee.AddRule(Rule.Rules["control Player"]);
             Program.Referee.AddRule(Rule.Rules["vvvvvv-platformer"]);
+
+            SinWaveSound sound = new SinWaveSound(true,
+                80, 44100 / Program.TPS * 10, 0, 44100 / Program.TPS * 30,
+                80, 44100 / Program.TPS * 5, 0, 44100 / Program.TPS * 5, 120, 44100 / Program.TPS * 10, 0, 44100 / Program.TPS * 60,
+                80, 44100 / Program.TPS * 10, 0, 44100 / Program.TPS * 30,
+                120, 44100 / Program.TPS * 5, 0, 44100 / Program.TPS * 5, 150, 44100 / Program.TPS * 10, 0, 44100 / Program.TPS * 60);
+            sound.SetWaveFormat(44100, 2);
 
             Entity deckFlipper = new Entity(new Description2D(0, 0, 0, 0));
             int timer = 0;
@@ -136,6 +144,9 @@ namespace Game.Levels
             Program.Engine.AddEntity(HeadsUpDisplay.Create());
 
             Program.Referee.Start();
+
+            Program.WavProvider.AddMixerInput((ISampleProvider)sound);
+            Program.WavPlayer.Play();
         }
     }
 }

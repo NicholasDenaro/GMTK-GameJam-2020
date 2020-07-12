@@ -1,5 +1,6 @@
 ﻿using GameEngine;
 using GameEngine._2D;
+using NAudio.Wave;
 using System;
 using System.Collections.Generic;
 using System.Drawing;
@@ -38,6 +39,9 @@ namespace Game.Levels
             {
                 Program.Referee.AddRule(Rule.Rules["shoot Boss"]);
             }
+
+            SinWaveSound sound = new SinWaveSound(true);
+            sound.SetWaveFormat(44100, 2);
 
             Entity deckFlipper = new Entity(new Description2D(0, 0, 0, 0));
             int timer = 0;
@@ -87,6 +91,9 @@ namespace Game.Levels
             Program.Referee.ResetTimer(Program.TPS * 180);
 
             Program.Referee.Start();
+
+            Program.WavProvider.AddMixerInput((ISampleProvider)sound);
+            Program.WavPlayer.Play();
         }
     }
 }

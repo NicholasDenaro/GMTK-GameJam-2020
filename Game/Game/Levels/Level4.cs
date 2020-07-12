@@ -58,9 +58,10 @@ namespace Game.Levels
             Program.Referee.AddRule(Rule.Rules["top-down"]);
 
             SinWaveSound sound = new SinWaveSound(true,
-                100, 44100 / Program.TPS * 20, 150, 44100 / Program.TPS * 15, 200, 44100 / Program.TPS * 10, 300, 44100 / Program.TPS * 5, 0, 44100 / Program.TPS * 5,
-                120, 44100 / Program.TPS * 5, 150, 44100 / Program.TPS * 2, 200, 44100 / Program.TPS * 2, 0, 44100 / Program.TPS * 10, 100, 44100 / Program.TPS * 30, 80, 44100 / Program.TPS * 30, 60, 44100 / Program.TPS * 30
-                );
+                80, 44100 / Program.TPS * 30, 0, 44100 / Program.TPS * 5,
+                150, 44100 / Program.TPS * 30, 0, 44100 / Program.TPS * 5,
+                100, 44100 / Program.TPS * 30, 0, 44100 / Program.TPS * 5,
+                120, 44100 / Program.TPS * 30, 0, 44100 / Program.TPS * 5);
             sound.SetWaveFormat(44100, 2);
 
             Entity deckFlipper = new Entity(new Description2D(0, 0, 0, 0));

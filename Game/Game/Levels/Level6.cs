@@ -21,7 +21,7 @@ namespace Game.Levels
                 Program.Engine.AddEntity(Powerup.Create("pop DEATH", 24, Program.ScreenHeight / 2 - 48));
                 Program.Engine.AddEntity(Powerup.Create("Enemy hurty", 24, Program.ScreenHeight / 2 - 16));
             });
-            deck.Push(() =>  Program.Engine.AddEntity(Powerup.Create("shooty attack", Program.ScreenWidth / 2, Program.ScreenHeight / 2 + 16)));
+            deck.Push(() =>  Program.Engine.AddEntity(Powerup.Create("shoot Enemy", Program.ScreenWidth / 2, Program.ScreenHeight / 2 + 16)));
             deck.Push(() => { });
 
             Program.Referee.ClearRules();

@@ -50,6 +50,8 @@ namespace Game.Levels
 
             Program.Engine.AddEntity(Boss.Create(Program.ScreenHeight - 16, Program.ScreenHeight / 2));
 
+            Program.Referee.ResetTimer(Program.TPS * 120);
+
             Program.Referee.Start();
         }
     }

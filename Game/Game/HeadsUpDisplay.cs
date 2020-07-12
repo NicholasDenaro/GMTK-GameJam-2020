@@ -31,7 +31,9 @@ namespace Game
 
             string timeLeft = $"Time left: {Program.Referee.Timer / Program.TPS}";
 
-            gfx.DrawString(timeLeft, f, Brushes.Black, new Point(Program.ScreenWidth * Program.Scale, i * 12), format);
+            gfx.DrawString(timeLeft, f, Brushes.Black, new Point(Program.ScreenWidth * Program.Scale, 0), format);
+
+            gfx.DrawString($"Lives: {new string('$', Program.Lives)}", f, Brushes.Black, new Point(Program.ScreenWidth * Program.Scale, 16), format);
 
             format.Alignment = StringAlignment.Near;
             foreach (Stack<Rule> stack in Program.Referee.Piles.Values)

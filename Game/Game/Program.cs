@@ -22,6 +22,16 @@ namespace Game
         public const int STARTINGLEVEL = 7;
         public static int Level = 0;
 
+        public static bool CreditsFinished = true;
+
+        public enum Difficulty { EASY, NORMAL, HARD };
+
+        public static Difficulty Diff = Difficulty.NORMAL;
+
+        public static int Lives { get; set; } = 1;
+
+        public static int Iframe { get; set; } = 0;
+
         public static List<Level> Levels { get; private set; } = new List<Level>();
 
         public static Random Random { get; private set; } = new Random();
@@ -66,6 +76,11 @@ namespace Game
 
             Engine.TickEnd += (s, gs) =>
             {
+                if (Iframe > 0)
+                {
+                    Iframe--;
+                }
+
                 if (Program.Keyboard[(int)Actions.ESCAPE].IsPress())
                 {
                     SetupTitleScreen();
@@ -93,18 +108,43 @@ namespace Game
                         }
                     }
 
+                    // Levels can call the reset with something different
+                    Referee.ResetTimer();
+
                     switch (Level)
                     {
                         case -1:
                             SetupCrazyMode();
                             break;
+                        case 0:
+                            break;
+                        case 8:
+                            SetupCredits();
+                            Level = 9;
+                            break;
+                        case 9:
+                            if (CreditsFinished)
+                            {
+                                SetupTitleScreen();
+                            }
+                            break;
                         default:
-                            Levels[Level - 1].SetupLevel();
+                            if (CreditsFinished)
+                            {
+                                Levels[Level - 1].SetupLevel();
+                            }
                             break;
 
                     }
 
-                    Referee.ResetTimer();
+                    if (Program.Diff == Difficulty.NORMAL && Level == 7)
+                    {
+                        Lives = 3;
+                    }
+                    else
+                    {
+                        Lives = 1;
+                    }
                 }
             };
 
@@ -180,11 +220,14 @@ namespace Game
             int time = Program.ScreenHeight / 2 + 8;
             TickHandler t = null;
 
+            CreditsFinished = false;
+
             t = (s, o) =>
             {
                 if (time-- <= 0)
                 {
                     Engine.TickEnd -= t;
+                    CreditsFinished = true;
                 }
             };
 
@@ -242,12 +285,48 @@ namespace Game
                 {
                     if (timer-- == 0 || timer > 0 && isPress)
                     {
+                        timer = -1;
                         logoDescription.ImageIndex = 0;
 
                         Engine.AddEntity(Text.Create("RuleScramble", new Font("", 24, FontStyle.Italic | FontStyle.Bold | FontStyle.Underline), ScreenWidth / 2, 16));
                         Engine.AddEntity(Button.Create("Story Mode", Levels[STARTINGLEVEL - 1].SetupLevel, ScreenWidth / 2 - 128 / 2, ScreenHeight / 2 - 48));
                         Engine.AddEntity(Button.Create("Crazy Mode", SetupCrazyMode, ScreenWidth / 2 - 128 / 2, ScreenHeight / 2 + 8));
                         Engine.AddEntity(Button.Create("Credits", SetupCredits, ScreenWidth / 2 - 128 / 2, ScreenHeight / 2 + 64));
+
+                        Button easyButton = null;
+                        Button normalButton = null; 
+                        Button hardButton = null;
+
+                        Entity button = Button.Create("easy", () =>
+                        {
+                            Program.Diff = Difficulty.EASY;
+                            easyButton.IsSelected = true;
+                            normalButton.IsSelected = false;
+                            hardButton.IsSelected = false;
+                        }, ScreenWidth / 2 + 80, ScreenHeight / 2 - 48, 64, 32);
+                        Engine.AddEntity(button);
+                        easyButton = button.Description as Button;
+
+                        button = Button.Create("normal", () =>
+                        {
+                            Program.Diff = Difficulty.NORMAL;
+                            easyButton.IsSelected = false;
+                            normalButton.IsSelected = true;
+                            hardButton.IsSelected = false;
+                        }, ScreenWidth / 2 + 80, ScreenHeight / 2 - 16, 64, 32);
+                        Engine.AddEntity(button);
+                        normalButton = button.Description as Button;
+                        normalButton.IsSelected = true;
+
+                        button = Button.Create("hard", () =>
+                        {
+                            Program.Diff = Difficulty.HARD;
+                            easyButton.IsSelected = false;
+                            normalButton.IsSelected = false;
+                            hardButton.IsSelected = true;
+                        }, ScreenWidth / 2 + 80, ScreenHeight / 2 + 16, 64, 32);
+                        Engine.AddEntity(button);
+                        hardButton = button.Description as Button;
                     }
                 }
             };
@@ -378,8 +457,16 @@ namespace Game
             {
                 if (!location.GetEntities<Banner>().Any() && Referee.IsStarted)
                 {
-                    Referee.Stop();
-                    location.AddEntity(Banner.Create("you lose"));
+                    if (Iframe == 0 && Lives-- == 1)
+                    {
+                        Referee.Stop();
+                        location.AddEntity(Banner.Create("you lose"));
+                    }
+
+                    if (Iframe == 0)
+                    {
+                        Iframe = TPS;
+                    }
                 }
             });
 
@@ -387,8 +474,16 @@ namespace Game
             {
                 if (!location.GetEntities<Banner>().Any() && Referee.IsStarted)
                 {
-                    Referee.Stop();
-                    location.AddEntity(Banner.Create("you lose"));
+                    if (Iframe == 0 && Lives-- == 1)
+                    {
+                        Referee.Stop();
+                        location.AddEntity(Banner.Create("you lose"));
+                    }
+
+                    if (Iframe == 0)
+                    {
+                        Iframe = TPS;
+                    }
                 }
             });
 
@@ -396,8 +491,16 @@ namespace Game
             {
                 if (!location.GetEntities<Banner>().Any() && Referee.IsStarted)
                 {
-                    Referee.Stop();
-                    location.AddEntity(Banner.Create("you lose"));
+                    if (Iframe == 0 && Lives-- == 1)
+                    {
+                        Referee.Stop();
+                        location.AddEntity(Banner.Create("you lose"));
+                    }
+
+                    if (Iframe == 0)
+                    {
+                        Iframe = TPS;
+                    }
                 }
             });
 

@@ -12,8 +12,9 @@ namespace Game
     {
         private string text;
         private Action action;
+        public bool IsSelected { get; set; }
 
-        public Button(string text, Action action, int x, int y) : base(Sprite.Sprites["button"], x, y, 128, 48)
+        public Button(string text, Action action, int x, int y, int w, int h) : base(Sprite.Sprites["button"], x, y, w, h)
         {
             this.text = text;
             this.action = action;
@@ -29,7 +30,14 @@ namespace Game
             format.Alignment = StringAlignment.Center;
             format.LineAlignment = StringAlignment.Center;
 
-            gfx.FillRectangle(Brushes.White, 0, 0, this.Width, this.Height);
+            Brush brush = Brushes.White;
+
+            if (IsSelected)
+            {
+                brush = Brushes.Gray;
+            }
+
+            gfx.FillRectangle(brush, 0, 0, this.Width, this.Height);
             gfx.DrawRectangle(Pens.Black, 0, 0, this.Width - 1, this.Height - 1);
             gfx.DrawString(text, f, Brushes.Black, this.Width / 2, this.Height / 2, format);
 
@@ -49,9 +57,9 @@ namespace Game
             }
         }
 
-        public static Entity Create(string text, Action action, int x, int y)
+        public static Entity Create(string text, Action action, int x, int y, int w = 128, int h = 48)
         {
-            Button enemy = new Button(text, action, x, y);
+            Button enemy = new Button(text, action, x, y, w, h);
             enemy.DrawAction = enemy.Draw;
             Entity entity = new Entity(enemy);
             entity.TickAction = enemy.Tick;

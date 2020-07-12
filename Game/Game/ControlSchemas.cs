@@ -15,6 +15,12 @@ namespace Game
         private static double velocity;
         private static int velocityDirection = 1;
 
+        public static void Reset()
+        {
+            velocity = 0;
+            velocityDirection = 1;
+        }
+
         public static void TopDown(Location location, object obj)
         {
             if (obj == null)
@@ -181,7 +187,7 @@ namespace Game
                 if (onGround || d2d.Y + velocity >= ((Description2D)location.Description).Height || d2d.Y + velocity <= 0)
                 {
                     velocityDirection = -velocityDirection;
-                    velocity = velocityDirection * 2;
+                    velocity = velocityDirection * 4;
                 }
             }
             if (Program.Keyboard[(int)Actions.LEFT].IsDown())

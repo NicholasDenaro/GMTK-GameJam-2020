@@ -14,9 +14,13 @@ namespace Game
         public static Color Color { get; private set; } = Color.LightGray;
 
         public Guid Id { get; private set; }
-        int health = 21; // 100
-        private int stealAttack = 3; // 0
-        private bool shiftRoom = true; // false
+        int health = Program.Diff == Program.Difficulty.EASY ? savedHealth : 100; // 100
+        private int stealAttack = Program.Diff == Program.Difficulty.EASY ? savedStealAttack : 0; // 0
+        private bool shiftRoom = Program.Diff == Program.Difficulty.EASY ? savedShiftRoom : false; // false
+
+        private static int savedHealth = 100;
+        private static int savedStealAttack = 0;
+        private static bool savedShiftRoom = false;
 
         private int attackTimerMax = Program.TPS * 2;
         private int attackTimer = Program.TPS * 3;
@@ -58,6 +62,9 @@ namespace Game
 
             if (health == 80)
             {
+                savedHealth = 81;
+                savedStealAttack = stealAttack;
+                savedShiftRoom = shiftRoom;
                 Program.Referee.AddRule("platformer");
                 attackTimerMax = 30;
                 Program.Referee.AddRule(Rule.Rules["Goal hurty"]);
@@ -77,6 +84,9 @@ namespace Game
 
             if (health == 60 && !shiftRoom)
             {
+                savedHealth = 61;
+                savedStealAttack = stealAttack;
+                savedShiftRoom = shiftRoom;
                 Program.Referee.AddRule("vvvvvv-platformer");
                 attackTimerMax = 60;
                 Program.Referee.AddRule(Rule.Rules["Powerup hurty"]);
@@ -114,6 +124,9 @@ namespace Game
 
             if (health == 40 && shiftRoom)
             {
+                savedHealth = 41;
+                savedStealAttack = stealAttack;
+                savedShiftRoom = shiftRoom;
                 Program.Referee.AddRule("top-down");
                 Program.Referee.AddRule("Enemy hurty");
                 attackTimer = 30;
@@ -158,6 +171,9 @@ namespace Game
 
             if (health == 20)
             {
+                savedHealth = 21;
+                savedStealAttack = stealAttack;
+                savedShiftRoom = shiftRoom;
                 Program.Referee.AddRule("pop DEATH");
                 Program.Referee.AddRule("pop DEATH");
                 Program.Referee.AddRule("pop DEATH");
@@ -251,10 +267,11 @@ namespace Game
                 else if (health > 20)
                 {
                     int yPos = Program.Random.Next(16, Program.ScreenHeight - 16);
-                    int delta = 0;
+                    double delta = 0;
                     location.AddEntity(Enemy.Create(Program.ScreenWidth, yPos).AddTickAction((l, e) =>
                     {
-                        ((Description2D)e.Description).ChangeCoordsDelta(-delta++, 0);
+                        ((Description2D)e.Description).ChangeCoordsDelta(-delta, 0);
+                        delta += 0.25;
                     }));
                 }
                 // just wait

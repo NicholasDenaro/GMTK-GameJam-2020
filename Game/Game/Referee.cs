@@ -106,6 +106,11 @@ namespace Game
         {
             Rule rule = Rule.Rules[name];
             Piles[rule.Type].Push(rule);
+
+            if(rule.Type == Rule.RuleType.PERSPECTIVE)
+            {
+                ControlSchemas.Reset();
+            }
         }
 
         public void AddRule(Rule rule)

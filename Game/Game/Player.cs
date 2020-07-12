@@ -25,7 +25,6 @@ namespace Game
             Bitmap bmp = BitmapExtensions.CreateBitmap(16, 16);
             Graphics gfx = Graphics.FromImage(bmp);
             gfx.FillEllipse(new SolidBrush(Color), 0, 0, 16, 16);
-            //gfx.FillRectangle(new SolidBrush(Color), 0, 0, 16, 16);
 
             return bmp;
         }

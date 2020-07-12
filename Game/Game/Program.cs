@@ -19,7 +19,7 @@ namespace Game
         public const int ScreenWidth = 320;
         public const int Scale = 2;
 
-        public const int STARTINGLEVEL = 7;
+        public const int STARTINGLEVEL = 4;
         public static int Level = 0;
 
         public static bool CreditsFinished = true;
@@ -431,7 +431,7 @@ namespace Game
                 if (!location.GetEntities<Banner>().Any() && Referee.IsStarted)
                 {
                     Referee.Stop();
-                    location.AddEntity(Banner.Create("you win"));
+                    Program.Engine.AddEntity(Banner.Create("you win"));
                 }
             });
 
@@ -440,7 +440,7 @@ namespace Game
                 if (!location.GetEntities<Banner>().Any() && Referee.IsStarted)
                 {
                     Referee.Stop();
-                    location.AddEntity(Banner.Create("you win"));
+                    Program.Engine.AddEntity(Banner.Create("you win"));
                 }
             });
 
@@ -449,7 +449,7 @@ namespace Game
                 if (!location.GetEntities<Banner>().Any() && Referee.IsStarted)
                 {
                     Referee.Stop();
-                    location.AddEntity(Banner.Create("you win"));
+                    Program.Engine.AddEntity(Banner.Create("you win"));
                 }
             });
 
@@ -460,7 +460,7 @@ namespace Game
                     if (Iframe == 0 && Lives-- == 1)
                     {
                         Referee.Stop();
-                        location.AddEntity(Banner.Create("you lose"));
+                        Program.Engine.AddEntity(Banner.Create("you lose"));
                     }
 
                     if (Iframe == 0)
@@ -477,7 +477,7 @@ namespace Game
                     if (Iframe == 0 && Lives-- == 1)
                     {
                         Referee.Stop();
-                        location.AddEntity(Banner.Create("you lose"));
+                        Program.Engine.AddEntity(Banner.Create("you lose"));
                     }
 
                     if (Iframe == 0)
@@ -494,7 +494,7 @@ namespace Game
                     if (Iframe == 0 && Lives-- == 1)
                     {
                         Referee.Stop();
-                        location.AddEntity(Banner.Create("you lose"));
+                        Program.Engine.AddEntity(Banner.Create("you lose"));
                     }
 
                     if (Iframe == 0)

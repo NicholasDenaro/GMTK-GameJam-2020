@@ -37,6 +37,11 @@ namespace Game.Levels
             int timer = 0;
             deckFlipper.TickAction = (loc, ent) =>
             {
+                if (Program.Engine.Location.GetEntities<DialogBox>().Any())
+                {
+                    return;
+                }
+
                 if (Program.Referee.IsStarted && deck.Any() && timer++ % (Program.TPS * 5) == 0)
                 {
                     deck.Pop().Invoke();

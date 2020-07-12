@@ -3,6 +3,7 @@ using GameEngine._2D;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Runtime.CompilerServices;
 using System.Text;
 
 namespace Game.Levels
@@ -16,16 +17,37 @@ namespace Game.Levels
 
             Program.Engine.SetLocation(new Location(new Description2D(0, 0, Program.ScreenWidth, Program.ScreenHeight)));
 
-            Stack<Rule> deck = new Stack<Rule>();
-            deck.Push(Rule.Rules["pop VICTORY"]);
-            deck.Push(Rule.Rules["Goal victory"]);
-            deck.Push(Rule.Rules["pop VICTORY"]);
-            deck.Push(Rule.Rules["Goal victory"]);
-            deck.Push(Rule.Rules["pop VICTORY"]);
-            deck.Push(Rule.Rules["Goal victory"]);
-            deck.Push(Rule.Rules["pop VICTORY"]);
-            deck.Push(Rule.Rules["Goal victory"]);
-            deck.Push(Rule.Rules["pop VICTORY"]);
+            Action good = () =>
+            {
+                Program.Referee.AddRule(Rule.Rules["Goal victory"]);
+                Program.Referee.Piles[Rule.RuleType.DEATH].Pop();
+            };
+
+            Action bad = () =>
+            {
+                Program.Referee.Piles[Rule.RuleType.VICTORY].Pop();
+                Program.Referee.AddRule("Goal hurty");
+            };
+
+            Stack<Action> deck = new Stack<Action>();
+            for (int i = 0; i < 3; i++)
+            {
+                deck.Push(bad);
+                deck.Push(good);
+            }
+
+            deck.Push(bad);
+            deck.Push(() =>
+            {
+                good();
+                Program.Engine.Location.AddEntity(DialogBox.Create("And now it's back! Better time this right."));
+            });
+            deck.Push(() =>
+            {
+                bad();
+                Program.Engine.Location.AddEntity(DialogBox.Create("Wait... the victory condition is removed?\nAnd the goal will hurt me?!"));
+            });
+            deck.Push(() => Program.Engine.Location.AddEntity(DialogBox.Create("Let's make it to the goal again.")));
 
             Program.Referee.ClearRules();
 
@@ -37,10 +59,14 @@ namespace Game.Levels
             int timer = 0;
             deckFlipper.TickAction = (loc, ent) =>
             {
+                if (Program.Engine.Location.GetEntities<DialogBox>().Any())
+                {
+                    return;
+                }
+
                 if (deck.Any() && timer++ % (Program.TPS * 1) == 0)
                 {
-                    Rule rule = deck.Pop();
-                    Program.Referee.AddRule(rule);
+                    deck.Pop().Invoke();
                 }
             };
 

@@ -15,18 +15,32 @@ namespace Game.Levels
 
             Program.Engine.SetLocation(new Location(new Description2D(0, 0, Program.ScreenWidth, Program.ScreenHeight)));
 
-            Stack<Rule> deck = new Stack<Rule>();
-            deck.Push(Rule.Rules["Goal victory"]);
-            deck.Push(Rule.Rules["control Player"]);
-            deck.Push(Rule.Rules["top-down"]);
+            Stack<Action> deck = new Stack<Action>();
+            deck.Push(() =>
+            {
+                Program.Referee.AddRule(Rule.Rules["Goal victory"]);
+                Program.Engine.AddEntity(DialogBox.Create("Oh, look! I can win by touching the goal."));
+            });
+            deck.Push(() =>
+            {
+                Program.Referee.AddRule(Rule.Rules["control Player"]);
+                Program.Engine.AddEntity(DialogBox.Create("Aha! I can move now! But what to do?"));
+            });
+            deck.Push(() => Program.Engine.AddEntity(DialogBox.Create("What is this? I can't move...")));
+            deck.Push(() => Program.Referee.AddRule(Rule.Rules["top-down"]));
 
             Entity deckFlipper = new Entity(new Description2D(0, 0, 0, 0));
             int timer = 0;
             deckFlipper.TickAction = (loc, ent) =>
             {
-                if (deck.Any() && timer++ % (Program.TPS * 5) == 0)
+                if (Program.Engine.Location.GetEntities<DialogBox>().Any())
                 {
-                    Program.Referee.AddRule(deck.Pop());
+                    return;
+                }
+
+                if (Program.Referee.IsStarted && deck.Any() && timer++ % (Program.TPS * 2.5) == 0)
+                {
+                    deck.Pop().Invoke();
                 }
             };
 

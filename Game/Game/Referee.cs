@@ -46,13 +46,13 @@ namespace Game
             {
                 if (!state.Location.GetEntities<Banner>().Any())
                 {
-                    state.Location.AddEntity(Banner.Create("time expired"));
+                    Program.Engine.AddEntity(Banner.Create("time expired"));
                 }
 
                 return;
             }
 
-            if (state.Location.GetEntities<Banner>().Any())
+            if (state.Location.GetEntities<Banner>().Any() || state.Location.GetEntities<DialogBox>().Any())
             {
                 return;
             }

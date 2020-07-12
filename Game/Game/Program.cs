@@ -24,6 +24,8 @@ namespace Game
 
         public static bool CreditsFinished = true;
 
+        public static int ArcadeWins = 0;
+
         public enum Difficulty { EASY, NORMAL, HARD };
 
         public static Difficulty Diff = Difficulty.NORMAL;
@@ -301,7 +303,7 @@ namespace Game
 
                         Engine.AddEntity(Text.Create("RuleScramble", new Font("", 24, FontStyle.Italic | FontStyle.Bold | FontStyle.Underline), ScreenWidth / 2, 16));
                         Engine.AddEntity(Button.Create("Story Mode", Levels[STARTINGLEVEL - 1].SetupLevel, ScreenWidth / 2 - 128 / 2, ScreenHeight / 2 - 48));
-                        Engine.AddEntity(Button.Create("Crazy Mode", SetupCrazyMode, ScreenWidth / 2 - 128 / 2, ScreenHeight / 2 + 8));
+                        Engine.AddEntity(Button.Create("Arcade Mode", SetupCrazyMode, ScreenWidth / 2 - 128 / 2, ScreenHeight / 2 + 8));
                         Engine.AddEntity(Button.Create("Credits", SetupCredits, ScreenWidth / 2 - 128 / 2, ScreenHeight / 2 + 64));
 
                         Button easyButton = null;
@@ -443,6 +445,10 @@ namespace Game
                 {
                     Referee.Stop();
                     Program.Engine.AddEntity(Banner.Create("you win"));
+                    if (Referee.OutofControl)
+                    {
+                        ArcadeWins++;
+                    }
                 }
             });
 
@@ -452,6 +458,10 @@ namespace Game
                 {
                     Referee.Stop();
                     Program.Engine.AddEntity(Banner.Create("you win"));
+                    if (Referee.OutofControl)
+                    {
+                        ArcadeWins++;
+                    }
                 }
             });
 
@@ -461,6 +471,10 @@ namespace Game
                 {
                     Referee.Stop();
                     Program.Engine.AddEntity(Banner.Create("you win"));
+                    if (Referee.OutofControl)
+                    {
+                        ArcadeWins++;
+                    }
                 }
             });
 
@@ -471,7 +485,15 @@ namespace Game
                     if (Iframe == 0 && Lives-- == 1)
                     {
                         Referee.Stop();
-                        Program.Engine.AddEntity(Banner.Create("you lose"));
+                        if (!Referee.OutofControl)
+                        {
+                            Program.Engine.AddEntity(Banner.Create("you lose"));
+                        }
+                        else
+                        {
+                            Program.Engine.AddEntity(Banner.Create($"you lose. Score: {ArcadeWins}"));
+                            ArcadeWins = 0;
+                        }
                     }
 
                     if (Iframe == 0)
@@ -488,7 +510,15 @@ namespace Game
                     if (Iframe == 0 && Lives-- == 1)
                     {
                         Referee.Stop();
-                        Program.Engine.AddEntity(Banner.Create("you lose"));
+                        if (!Referee.OutofControl)
+                        {
+                            Program.Engine.AddEntity(Banner.Create("you lose"));
+                        }
+                        else
+                        {
+                            Program.Engine.AddEntity(Banner.Create($"you lose. Score: {ArcadeWins}"));
+                            ArcadeWins = 0;
+                        }
                     }
 
                     if (Iframe == 0)
@@ -505,7 +535,15 @@ namespace Game
                     if (Iframe == 0 && Lives-- == 1)
                     {
                         Referee.Stop();
-                        Program.Engine.AddEntity(Banner.Create("you lose"));
+                        if (!Referee.OutofControl)
+                        {
+                            Program.Engine.AddEntity(Banner.Create("you lose"));
+                        }
+                        else
+                        {
+                            Program.Engine.AddEntity(Banner.Create($"you lose. Score: {ArcadeWins}"));
+                            ArcadeWins = 0;
+                        }
                     }
 
                     if (Iframe == 0)

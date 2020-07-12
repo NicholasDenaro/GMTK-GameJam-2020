@@ -31,7 +31,9 @@ namespace Game
             {
                 continueText = "Press R to try again";
             }
-            gfx.DrawString(continueText, f, Brushes.Black, Program.ScreenWidth + 160, 16, format);
+
+            format.Alignment = StringAlignment.Far;
+            gfx.DrawString(continueText, f, Brushes.Black, Program.ScreenWidth * Program.Scale, 16, format);
 
             return bmp;
         }

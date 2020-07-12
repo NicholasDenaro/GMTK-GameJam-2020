@@ -19,9 +19,9 @@ namespace Game
         private int stealAttack = Program.Diff == Program.Difficulty.EASY ? savedStealAttack : 0; // 0
         private bool shiftRoom = Program.Diff == Program.Difficulty.EASY ? savedShiftRoom : false; // false
 
-        public static int savedHealth = 41;
+        public static int savedHealth = 100;
         private static int savedStealAttack = 0;
-        private static bool savedShiftRoom = true;
+        private static bool savedShiftRoom = false;
 
         private int attackTimerMax = Program.TPS * 2;
         private int attackTimer = Program.TPS * 3;
@@ -157,7 +157,21 @@ namespace Game
 
                 sound.Silent = true;
 
-                sound = new SinWaveSound(true);
+                sound = new SinWaveSound(true,
+                    
+                    80, 44100 / Program.TPS * 30,
+
+                    150, 44100 / Program.TPS * 15,
+
+                    120, 44100 / Program.TPS * 30,
+
+                    80, 44100 / Program.TPS * 7.5f,
+
+                    0, 44100 / Program.TPS * 7.5f,
+
+                    80, 44100 / Program.TPS * 7.5f,
+
+                    120, 44100 / Program.TPS * 30);
                 sound.SetWaveFormat(44100, 2);
 
                 Program.WavProvider.AddMixerInput((ISampleProvider)sound);

@@ -1,5 +1,6 @@
 ﻿using GameEngine;
 using GameEngine._2D;
+using NAudio.Wave;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -29,6 +30,12 @@ namespace Game.Levels
             deck.Push(() => Program.Engine.AddEntity(DialogBox.Create("What is this? I can't move...")));
             deck.Push(() => Program.Referee.AddRule(Rule.Rules["top-down"]));
 
+
+            SinWaveSound sound = new SinWaveSound(true,
+                100, 44100 / Program.TPS * 10,
+                0, 44100 / Program.TPS * 90);
+            sound.SetWaveFormat(44100, 2);
+
             Entity deckFlipper = new Entity(new Description2D(0, 0, 0, 0));
             int timer = 0;
             deckFlipper.TickAction = (loc, ent) =>
@@ -55,6 +62,9 @@ namespace Game.Levels
             Program.Referee.ClearRules();
 
             Program.Referee.Start();
+
+            Program.WavProvider.AddMixerInput((ISampleProvider)sound);
+            Program.WavPlayer.Play();
         }
     }
 }

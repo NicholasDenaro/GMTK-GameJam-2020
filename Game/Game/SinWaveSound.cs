@@ -22,6 +22,10 @@ namespace Game
             Amplitude = 0.01f; // let's not hurt our ears
             loop = true;
         }
+        public SinWaveSound(bool loop, params float[] freqs) : this(freqs)
+        {
+            this.loop = loop;
+        }
         public SinWaveSound(params float[] freqs)
         {
             Frequencies = freqs;
@@ -39,6 +43,9 @@ namespace Game
         private bool loop;
 
         public bool IsFinished => freq >= Frequencies.Length;
+
+        public bool Silent { get; set; } = false;
+        public bool Quiet { get; set; } = false;
 
         public override int Read(float[] buffer, int offset, int sampleCount)
         {
@@ -66,7 +73,11 @@ namespace Game
 
                 float f = freq < Frequencies.Length ? Frequencies[freq] : 0;
 
-                buffer[n + offset] = (float)(Amplitude * Math.Sin((2 * Math.PI * sample * f) / sampleRate));
+                float amp = Silent ? 0 : Amplitude;
+
+                amp = Quiet ? amp / 2 : amp;
+
+                buffer[n + offset] = (float)(amp * Math.Sin((2 * Math.PI * sample * f) / sampleRate));
                 sample++;
                 if (sample >= sampleRate) sample = 0;
             }

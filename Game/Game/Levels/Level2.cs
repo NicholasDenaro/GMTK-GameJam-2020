@@ -1,5 +1,6 @@
 ﻿using GameEngine;
 using GameEngine._2D;
+using NAudio.Wave;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -10,7 +11,6 @@ namespace Game.Levels
 {
     public class Level2 : Level
     {
-
         public override void SetupLevel()
         {
             Program.Level = 2;
@@ -57,12 +57,22 @@ namespace Game.Levels
 
             Entity deckFlipper = new Entity(new Description2D(0, 0, 0, 0));
             int timer = 0;
+
+            SinWaveSound sound = new SinWaveSound(true,
+                100, 44100 / Program.TPS * 20, 250, 44100 / Program.TPS * 15, 200f, 44100 / Program.TPS * 10, 0, 44100 / Program.TPS * 15,
+                100, 44100 / Program.TPS * 20, 150, 44100 / Program.TPS * 15, 200f, 44100 / Program.TPS * 10, 300f, 44100 / Program.TPS * 5, 0, 44100 / Program.TPS * 20
+                );
+            sound.SetWaveFormat(44100, 2);
+
             deckFlipper.TickAction = (loc, ent) =>
             {
                 if (Program.Engine.Location.GetEntities<DialogBox>().Any() || Program.Engine.Location.GetEntities<Banner>().Any())
                 {
+                    sound.Quiet = true;
                     return;
                 }
+
+                sound.Quiet = false;
 
                 if (deck.Any() && timer++ % (Program.TPS * 1) == 0)
                 {
@@ -79,6 +89,9 @@ namespace Game.Levels
             Program.Engine.AddEntity(HeadsUpDisplay.Create());
 
             Program.Referee.Start();
+
+            Program.WavProvider.AddMixerInput((ISampleProvider)sound);
+            Program.WavPlayer.Play();
         }
     }
 }

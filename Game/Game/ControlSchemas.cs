@@ -181,7 +181,7 @@ namespace Game
                 if (onGround || d2d.Y + velocity >= ((Description2D)location.Description).Height || d2d.Y + velocity <= 0)
                 {
                     velocityDirection = -velocityDirection;
-                    velocity = 0;
+                    velocity = velocityDirection * 2;
                 }
             }
             if (Program.Keyboard[(int)Actions.LEFT].IsDown())

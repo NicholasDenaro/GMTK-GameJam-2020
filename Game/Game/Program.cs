@@ -106,8 +106,6 @@ namespace Game
 
                     Referee.ResetTimer();
                 }
-
-                ////window.Position = window.Position.WithX(window.Position.X + 1);
             };
 
             Engine.Start();

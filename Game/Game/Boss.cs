@@ -1,5 +1,6 @@
 ﻿using GameEngine;
 using GameEngine._2D;
+using GameEngine.UI.AvaloniaUI;
 using System;
 using System.Collections.Generic;
 using System.Drawing;
@@ -13,16 +14,22 @@ namespace Game
         public static Color Color { get; private set; } = Color.LightGray;
 
         public Guid Id { get; private set; }
-        int health = 61;
+        int health = 21; // 100
+        private int stealAttack = 3; // 0
+        private bool shiftRoom = true; // false
 
         private int attackTimerMax = Program.TPS * 2;
         private int attackTimer = Program.TPS * 3;
 
-        private int stealAttack = 0;
+        private AvaloniaWindow window = Program.Builder.Frame.Window as AvaloniaWindow;
 
-        private bool shiftRoom;
+        private List<Guid> centerWalls = new List<Guid>();
 
-        private Guid centerWall;
+        private bool attackTop;
+
+        private TickHandler windowAction = null;
+
+        private Avalonia.PixelPoint originalWindowPosition;
 
         public Boss(int x, int y) : base(Sprite.Sprites["boss"], x, y, 80, 80)
         {
@@ -73,37 +80,122 @@ namespace Game
                 Program.Referee.AddRule("vvvvvv-platformer");
                 attackTimerMax = 60;
                 Program.Referee.AddRule(Rule.Rules["Powerup hurty"]);
+                Program.Referee.AddRule("be fast");
 
                 shiftRoom = true;
 
-                Entity wall = Wall.Create(0, Program.ScreenHeight / 2, 128, 16);
-                centerWall = wall.Id;
-                location.AddEntity(wall);
+                for (int i = 0; i < 4; i++)
+                {
+                    Entity wall = Powerup.Create("pop SPEED", Program.ScreenWidth / 2 - 80 + i * 16, Program.ScreenHeight / 2);
+                    centerWalls.Add(wall.Id);
+                    location.AddEntity(wall);
+                }
+
+                attackTimerMax = 30;
             }
 
             if (health == 50 && stealAttack == 1)
             {
                 Program.Referee.AddRule("no attack. haha.");
-                location.AddEntity(Powerup.Create("shoot Boss", Program.ScreenWidth - 96, Program.ScreenHeight / 2));
+                Entity trigger = Powerup.Create("shoot Boss", Program.ScreenWidth - 128, Program.ScreenHeight / 2);
+                Guid triggerId = trigger.Id;
+                trigger.AddTickAction((loc, ent) =>
+                {
+                    if (loc.GetEntities<Player>().First().Distance((Description2D)ent.Description) < 20)
+                    {
+                        Program.Referee.AddRule("shoot Boss");
+                        loc.RemoveEntity(triggerId);
+                    }
+                });
+
+                location.AddEntity(trigger);
                 stealAttack++;
             }
 
             if (health == 40 && shiftRoom)
             {
                 Program.Referee.AddRule("top-down");
+                Program.Referee.AddRule("Enemy hurty");
+                attackTimer = 30;
+                attackTimerMax = 30;
                 shiftRoom = false;
-                location.RemoveEntity(centerWall);
+                foreach (Guid guid in centerWalls)
+                {
+                    location.RemoveEntity(guid);
+                }
+
+                double dir = location.GetEntities<Player>().First().Direction(new Point(Program.ScreenWidth / 2, Program.ScreenHeight / 2)) + Math.PI / 4;
+                centerWalls.Clear();
+                for (int j = 0; j < 4; j++)
+                {
+                    for (int i = 0; i < 12; i++)
+                    {
+                        int xoffset = (int)(Math.Cos(dir + j * Math.PI / 2) * i * 16);
+                        int yoffset = (int)(Math.Sin(dir + j * Math.PI / 2) * i * 16);
+
+                        Entity rotaty = Enemy.Create(Program.ScreenWidth / 2 + xoffset, Program.ScreenHeight / 2 + yoffset).AddTickAction((loc, ent) =>
+                        {
+                            Description2D enemyd = ent.Description as Description2D;
+
+                            double instantdir = enemyd.Direction(new Point(Program.ScreenWidth / 2, Program.ScreenHeight / 2));
+                            double dist = enemyd.Distance(new Point(Program.ScreenWidth / 2, Program.ScreenHeight / 2));
+
+                            enemyd.ChangeCoordsDelta(Math.Cos(instantdir + Math.PI / 2) * dist / 50, Math.Sin(instantdir + Math.PI / 2) * dist / 50);
+                        });
+
+                        centerWalls.Add(rotaty.Id);
+                        location.AddEntity(rotaty);
+                    }
+                }
+            }
+
+            if (health == 30 && stealAttack == 2)
+            {
+                Program.Referee.AddRule("no attack. haha.");
+                location.AddEntity(Powerup.Create("shoot Boss", Program.ScreenWidth - 128, Program.ScreenHeight / 2));
+                stealAttack++;
             }
 
             if (health == 20)
             {
+                Program.Referee.AddRule("pop DEATH");
+                Program.Referee.AddRule("pop DEATH");
+                Program.Referee.AddRule("pop DEATH");
+                Program.Referee.AddRule("pop DEATH");
 
+                foreach (Guid guid in centerWalls)
+                {
+                    location.RemoveEntity(guid);
+                }
+
+                attackTimer = 10;
+                attackTimerMax = 10;
+
+                originalWindowPosition = window.Position;
+            }
+
+            if (health == 0)
+            {
+                location.RemoveEntity(this.Id);
+                location.AddEntity(Banner.Create("you win"));
+
+                if (windowAction != null)
+                {
+                    Program.Engine.TickEnd -= windowAction;
+                }
+
+                window.Position = originalWindowPosition;
+
+                health--;
             }
 
             if (health <= 0)
             {
-                location.RemoveEntity(this.Id);
-                location.AddEntity(Banner.Create("you win"));
+                window.Position = originalWindowPosition;
+                if (windowAction != null)
+                {
+                    Program.Engine.TickEnd -= windowAction;
+                }
             }
 
             if (attackTimer-- == 0)
@@ -143,16 +235,53 @@ namespace Game
                 // vvvvvv-platformer
                 else if (health > 40)
                 {
+                    int y = attackTop ? 0 : Program.ScreenHeight / 2;
 
+                    for (int i = 0; i < 6; i++)
+                    {
+                        location.AddEntity(Powerup.Create("pop SPEED", Program.ScreenWidth, y + 16 + 16 * i).AddTickAction((l, e) =>
+                        {
+                            ((Description2D)e.Description).ChangeCoordsDelta(-5, 0);
+                        }));
+                    }
+
+                    attackTop = !attackTop;
                 }
                 // top-down spinny
                 else if (health > 20)
                 {
-
+                    int yPos = Program.Random.Next(16, Program.ScreenHeight - 16);
+                    int delta = 0;
+                    location.AddEntity(Enemy.Create(Program.ScreenWidth, yPos).AddTickAction((l, e) =>
+                    {
+                        ((Description2D)e.Description).ChangeCoordsDelta(-delta++, 0);
+                    }));
                 }
+                // just wait
                 else
                 {
+                    int velocity = (20 - health) * 2;
+                    double direction = Program.Random.NextDouble() * Math.PI * 2;
 
+                    if (windowAction != null)
+                    {
+                        Program.Engine.TickEnd -= windowAction;
+                    }
+
+                    location.AddEntity(Goal.Create(Program.Random.Next(16, Program.ScreenWidth - 16), Program.Random.Next(16, Program.ScreenHeight - 16)));
+                    location.AddEntity(Powerup.Create("pop SPEED", Program.Random.Next(16, Program.ScreenWidth - 16), Program.Random.Next(16, Program.ScreenHeight - 16)));
+                    location.AddEntity(Enemy.Create(Program.Random.Next(16, Program.ScreenWidth - 16), Program.Random.Next(16, Program.ScreenHeight - 16)));
+
+                    windowAction = (s, gs) =>
+                    {
+                        double shake = Program.Random.NextDouble() * Math.PI / 8;
+
+                        window.Position = window.Position
+                            .WithX((int)Math.Clamp(window.Position.X + Math.Cos(direction + shake - Math.PI / 4) * velocity, 0, 1920 - Program.ScreenWidth * Program.Scale))
+                            .WithY((int)Math.Clamp(window.Position.Y + Math.Sin(direction + shake - Math.PI / 4) * velocity, 0, 1080 - Program.ScreenHeight * Program.Scale));
+                    };
+
+                    Program.Engine.TickEnd += windowAction;
                 }
             }
         }

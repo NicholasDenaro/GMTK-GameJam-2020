@@ -19,7 +19,7 @@ namespace Game
         public const int ScreenWidth = 320;
         public const int Scale = 2;
 
-        public const int STARTINGLEVEL = 6;
+        public const int STARTINGLEVEL = 7;
         public static int Level = 0;
 
         public static List<Level> Levels { get; private set; } = new List<Level>();
@@ -103,6 +103,7 @@ namespace Game
                             break;
 
                     }
+
                     Referee.ResetTimer();
                 }
 
@@ -264,6 +265,7 @@ namespace Game
             Levels.Add(new Level4());
             Levels.Add(new Level5());
             Levels.Add(new Level6());
+            Levels.Add(new Level7());
         }
 
         public static bool Collision(Description2D d1, List<Description2D> d2s)
@@ -442,7 +444,7 @@ namespace Game
                 }
             });
 
-            new Rule("shooty attack", Rule.RuleType.ATTACK, (location, obj) =>
+            new Rule("shoot Enemy", Rule.RuleType.ATTACK, (location, obj) =>
             {
                 if (Program.Mouse[(int)Program.Actions.ACTION].IsPress())
                 {
@@ -458,37 +460,29 @@ namespace Game
                     int spawnX = (int)(player.X + Math.Cos(dir) * 8);
                     int spawnY = (int)(player.Y + Math.Sin(dir) * 8);
 
-                    Description2D bulletD = new Description2D(Sprite.Sprites["bullet"], spawnX, spawnY, 4, 4);
-                    bulletD.DrawAction = () =>
+                    location.AddEntity(Bullet<Enemy>.Create(spawnX, spawnY, dir));
+                }
+            });
+
+            int shootTimer = 15;
+            new Rule("shoot Boss", Rule.RuleType.ATTACK, (location, obj) =>
+            {
+                if (shootTimer-- <= 0 && Program.Mouse[(int)Program.Actions.ACTION].IsDown())
+                {
+                    shootTimer = 15;
+                    MouseControllerInfo mci = Program.Mouse[(int)Program.Actions.ACTION].Info as MouseControllerInfo;
+
+                    Player player = location.GetEntities<Player>().FirstOrDefault();
+                    if (player == null)
                     {
-                        Bitmap bmp = BitmapExtensions.CreateBitmap(4, 4);
-                        Graphics gfx = Graphics.FromImage(bmp);
-                        gfx.FillEllipse(Brushes.Black, 0, 0, 4, 4);
+                        return;
+                    }
+                    double dir = player.Direction(new Point(mci.X, mci.Y));
 
-                        return bmp;
-                    };
+                    int spawnX = (int)(player.X + Math.Cos(dir) * 8);
+                    int spawnY = (int)(player.Y + Math.Sin(dir) * 8);
 
-                    Entity bullet = new Entity(bulletD);
-                    Guid id = bullet.Id;
-                    bullet.TickAction = (loc, ent) =>
-                    {
-                        Description2D d2d = ent.Description as Description2D;
-                        d2d.ChangeCoordsDelta(Math.Cos(dir) * 8, Math.Sin(dir) * 8);
-                        foreach (Enemy enemy in loc.GetEntities<Enemy>())
-                        {
-                            if (d2d.IsCollision(enemy))
-                            {
-                                loc.RemoveEntity(enemy.Id);
-                            }
-                        }
-
-                        if (Collision(d2d, location.GetEntities<Wall>().Select(w => (Description2D)w).ToList()))
-                        {
-                            loc.RemoveEntity(id);
-                        }
-                    };
-
-                    location.AddEntity(bullet);
+                    location.AddEntity(Bullet<BulletNull>.Create(spawnX, spawnY, dir));
                 }
             });
 
@@ -615,6 +609,7 @@ namespace Game
             new Sprite("HUD", 0, 0);
             new Sprite("button", 0, 0);
             new Sprite("bullet", 2, 2);
+            new Sprite("boss", 0, 40);
 
             new Sprite("wall", 8, 8);
             new Sprite("text", 0, 0);

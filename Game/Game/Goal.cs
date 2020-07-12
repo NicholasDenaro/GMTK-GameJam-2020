@@ -5,7 +5,7 @@ using System.Drawing;
 
 namespace Game
 {
-    public class Goal : Description2D
+    public class Goal : Description2D, IIdentifiable
     {
         public Guid Id { get; private set; }
         public static Color Color { get; private set; } = Color.Cyan;

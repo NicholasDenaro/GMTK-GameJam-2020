@@ -5,7 +5,7 @@ using System.Drawing;
 
 namespace Game
 {
-    public class Enemy : Description2D
+    public class Enemy : Description2D, IIdentifiable
     {
         public double MoveDirection { get; private set; }
         public double VelX { get; internal set; }

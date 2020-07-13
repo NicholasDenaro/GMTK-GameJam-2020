@@ -19,11 +19,13 @@ namespace Game.Levels
 
             Program.Engine.SetLocation(new Location(new Description2D(0, 0, Program.ScreenWidth, Program.ScreenHeight)));
 
+            Program.Referee.ClearRules();
+
             Entity entb = Boss.Create(Program.ScreenHeight - 16, Program.ScreenHeight / 2);
             Program.Engine.AddEntity(entb);
 
             Stack<Action> deck = new Stack<Action>();
-            if (Boss.savedHealth == 100)
+            if (Boss.savedHealth == 100 || Program.Diff != Program.Difficulty.EASY)
             {
                 deck.Push(() =>
                 {
@@ -33,18 +35,15 @@ namespace Game.Levels
                 deck.Push(() => Program.Engine.AddEntity(DialogBox.Create("This isn't good. I have to do something.")));
                 deck.Push(() => { });
             }
-
-            Program.Referee.ClearRules();
+            else
+            {
+                Program.Referee.AddRule(Rule.Rules["shoot Boss"]);
+            }
 
             Program.Referee.AddRule(Rule.Rules["Enemy hurty"]);
             Program.Referee.AddRule(Rule.Rules["Player pickup Powerup"]);
             Program.Referee.AddRule(Rule.Rules["control Player"]);
             Program.Referee.AddRule(Rule.Rules["top-down"]);
-
-            if(Program.Diff == Program.Difficulty.EASY && Boss.savedHealth < 100)
-            {
-                Program.Referee.AddRule(Rule.Rules["shoot Boss"]);
-            }
 
             SinWaveSound sound = new SinWaveSound(true);
             sound.SetWaveFormat(44100, 2);
